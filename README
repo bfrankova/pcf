@@ -1,0 +1,111 @@
+pcf - PC fingerprinter
+
+Copyright (C) 2012 Jakub Jirasek <xjiras02@stud.fit.vutbr.cz>
+                   Libor Polčák <ipolcak@fit.vutbr.cz>
+
+This is a README file for pcf -- a tool for remote computer identification. The
+identification is done according to skew of the clocks inside each computer.
+Clock skew of a specific computer is computed from TCP timestamps. The program
+runs in an infinite loop and its output is a XML file containing recognized
+computers. The program was developed and tested in GNU/Linux.
+
+For install and uninstall instructions see INSTALL file.
+
+Usage
+-----
+
+Program has to be run as root or it has to have capabilities to listen for data
+on network interfaces.
+
+Usage: pcf [Options] [Interface]
+
+  -h		Help
+  -n		Number of packets to capture (0 -- default means infinity)
+  -t		Number of seconds to capture (0 -- default means infinity)
+  -p		Port number (1-65535, 0 -- default means all)
+
+Examples:
+  pcf
+  pcf -n 100 -t 600 -p 80 wlan0
+
+The first example runs the program according to parameters listed in the config
+file.
+
+It is possible to stop the program by sending SIGINT or SIGTERM.
+
+You can find more instructions about program configuration in the config file.
+All options are commented.
+
+You can configure your web server and enable web interface. You can see
+recognized computers and manage them in your browser.
+
+
+Files and directories
+---------------------
+
+bin/		- binary files (installed version of the program)
+src/		- source files
+
+src/
+  pcf		- program pcf
+  gen_pics.sh	- converts graphs from postscrip to jpeg
+  config	- configuration file
+
+  graph/	- graphs of the recognized computers
+  http_traffic/	- debug python script which is able to generate HTTP traffic (it
+      is not necessary to run this program for correct operation of pcf)
+  log/		- files containing log of drifts of monitored computers. These files
+      required for graph construction.
+  www/		- web interface
+
+
+Note
+----
+
+WARNING! When you stop the program, data stored in the file with active
+computers are lost. Information about unsaved computers will be forever lost.
+
+The files with active and saved computers are implicitly stored in
+www/data/active.xml and www/data/database.xml. Please follow install
+instructions for more informations how to setup permissions for those files.
+
+The variable BLOCK in config file set a limit after which the pcf re-computes
+clock skews, generates graphs etc. The program implicitly reduces number of
+stored packets after 5-times BLOCK packets are received and then after each
+block. When more then 100-times BLOCK packets are received the oldest packets
+are deleted from program memory.
+
+Program does not process packets with lower or the same time stamp as was
+already seen for earlier packet. This is positive in most situations but if a
+computer is restarted than pcf is not able to detect this and cope with the
+situation because the timestamps are usually lower.
+
+Computers with clock skew lower than selected in config file are not stored.
+This is useful if you have synchronized clocks on the monitoring computer and
+the detected computers have also synchronized clocks and thus their clock skew
+is very low and it is not possible to differentiate between these computers.
+Therefore, the computers running NTP most probably will not be listed as active.
+If this is not what you want, you are able to lower the THRESHOLD.
+
+A correction is applied to computed frequencies:
+freq >= 970 && freq <= 1030	=>	freq = 1000
+freq >= 230 && freq <= 270	=>	freq = 250
+freq >= 95 && freq <= 105	=>	freq = 100
+In many cases this means that the frequency is fixed but sometimes it may result
+to wrong frequency because some systems may use unusual frequency.
+
+
+Project origins
+---------------
+
+The very first revision in the pcf repository (https://github.com/polcak/pcf) is
+the result of diploma thesis of Jakub Jirasek, which was successfuly finished at
+Faculty of Information Technology, Brno University of Technology. You can see
+the report on http://www.fit.vutbr.cz/study/DP/DP.php.en?id=14040&y=2011 (the
+text is in Czech).
+
+The idea of computer identification based on TCP timestamps was first published
+in:
+Kohno, T.; Broido, A.; Claffy, K.: Remote physical device fingerprinting. IEEE
+Transactions on Dependable and Secure Computing, volume 2, no. 2, May 2005: pp.
+93–108, ISSN 1545-5971.

@@ -1,0 +1,5 @@
+config
+*.zip
+*.tar
+*.out
+*.swp
