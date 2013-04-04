@@ -60,9 +60,6 @@ class computer_info {
     /// List of time informations about packets
     packet_time_info_list packets;
 
-    /// Address of the computer
-    std::string address;
-
     /// Frequency of the computer
     int freq;
 
@@ -102,6 +99,9 @@ class computer_info {
     {
       return address;
     }
+    
+    /// Address of the computer
+    std::string address;
 
     int get_freq() const
     {
@@ -132,16 +132,21 @@ class computer_info {
     {
       return *(skew_list.rbegin());
     }
+    
+    skew known_skew;
 
   // Functions manipulating the state
   public:
+    //
+    skew last_calculated_skew;
+      
     /**
      * Adds a new packet without updating or recomputing anything
      * @param[in] packet_delivered Arrival time of the new packet
      * @param[in] timestamp TCP timestamp of the new packet
      * @param[inout] skews Storage of clock skews of known devices
      */
-    void insert_packet(double packet_delivered, uint32_t timestamp);
+    void insert_packet2(double packet_delivered, uint32_t timestamp);
 
     /**
      * Adds a new packet and possibly recomputes related informations
@@ -149,7 +154,7 @@ class computer_info {
      * @param[in] timestamp TCP timestamp of the new packet
      * @param[inout] skews Storage of clock skews of known devices
      */
-    void insert_packet(double packet_delivered, uint32_t timestamp, clock_skew_guard &skews);
+    void insert_packet(double packet_delivered, uint32_t timestamp);
 
     /**
      * Restart measurement
@@ -162,7 +167,7 @@ class computer_info {
 
   private:
     ///Performs actions after a block of packets is captured
-    void block_finished(double packet_delivered, clock_skew_guard &skews);
+    void block_finished(double packet_delivered);
     /// Adds initialized empty skew information
     void add_empty_skew(packet_time_info_list::iterator start);
     /// Computes a new skew

@@ -115,6 +115,8 @@ int main(int argc, char *argv[])
     }
   }
   
+  printf("main\n");
+  
   /// Get packets
   if (capture(config) != 0)
     return(2);

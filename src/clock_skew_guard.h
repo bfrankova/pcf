@@ -35,20 +35,7 @@ class clock_skew_guard: public observable<const computer_skew>
 {
   // Attributes
   private:
-    /**
-     * Dictionary of known skew of tracked computers
-     * IP addresses are mapped to clock skew
-     */
-    std::map<const std::string, skew> known_skew;
-
-    /**
-     * Number of PPM that controls if more addresses are treated as if they
-     * belong to the same computer.
-     */
-    const double THRESHOLD;
-
-    /// Filename of DB with saved computers
-    const char *saved_computers;
+    
 
   // Constructors, destructors
   public:
@@ -57,33 +44,17 @@ class clock_skew_guard: public observable<const computer_skew>
      *
      * @param[in] threshold Number of PPM that means that the address belongs to the same computer
      */
-    clock_skew_guard(const double threshold, const char* saved_computers_db): THRESHOLD(threshold), saved_computers(saved_computers_db) {}
+    //clock_skew_guard(const double threshold, const char* saved_computers_db): THRESHOLD(threshold), saved_computers(saved_computers_db) {}
 
-    ~clock_skew_guard() {}
+    //~clock_skew_guard() {}
 
   // Private methods
   private:
-    void construct_notify(const std::string &ip, const identity_container &identitites, const skew &s) const;
+    
 
   // Public methods
   public:
-    /**
-     * Adds or updates clock skew value of a address
-     * @param[in] ip The IP address for which the clock skew is provided
-     * @param[in] skew Clock skew of the IP address
-     */
-    void update_skew(const std::string &ip, const skew &s);
-
-    /**
-     * Returns IP addresses with similar clock skew to the IP address provided
-     * @param[in] ip The IP whose clock skew will be compared
-     */
-    const identity_container get_similar_identities(const std::string &ip);
-
-    /// Returns THRESHOLD
-    double get_threshold() {
-      return THRESHOLD;
-    }
+    
 };
 
 #endif

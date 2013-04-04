@@ -145,7 +145,7 @@ bool find_computer_in_saved(double referenced_skew, identity_container &identiti
   return true;
 }
 
-int save_active(const std::list<computer_info *> &all_computers, const char *active, clock_skew_guard &skews)
+int save_active(const std::list<computer_info *> &all_computers, const char *active, computer_info_list &computers)
 {
   xmlDocPtr doc;
   xmlNodePtr nodeptr = NULL, node = NULL, node_child = NULL;
@@ -192,7 +192,7 @@ int save_active(const std::list<computer_info *> &all_computers, const char *act
     xmlAddChild(nodeptr , node);
 
     // find computers with similar clock skew
-    identity_container similar_skew = skews.get_similar_identities((*it)->get_address());
+    identity_container similar_skew = computers.get_similar_identities((*it)->get_address());
     for (auto skew_it = similar_skew.begin(); skew_it != similar_skew.end(); ++skew_it) {
       /// <identity>
       node_child = xmlNewNode(NULL, BAD_CAST "identity");

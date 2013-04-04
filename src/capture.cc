@@ -24,6 +24,7 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+#include <iostream>
 
 #include <pcap.h>
 #include <arpa/inet.h>
@@ -189,7 +190,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
   // +--------+--------+---------+--------+
   // |  Kind  | Length |       Data       |
   // +--------+--------+---------+--------+
-
+  
   while (options_offset < options_size) {
     int kind = (int)tcp_options[options_offset];
     int option_len = 0;
@@ -246,6 +247,9 @@ int capture(pcf_config *config)
   bpf_u_int32 netp;
   // Addresses
   struct in_addr addr;
+  
+  
+  printf("capture(): start\n");
 
   
   /// Set the device
@@ -294,6 +298,8 @@ int capture(pcf_config *config)
     return(2);
   }
   
+  printf("capture(): pre-filter compilation 1\n");
+  
   /// Compile the filter
   char tmp[10];
   int length = 0;
@@ -340,10 +346,14 @@ int capture(pcf_config *config)
   printf("Filter: %s\n", filter);
 #endif
   
+  printf("capture(): pre-filter compilation 2\n");
+  
   if (pcap_compile(handle, &fp, filter, 0, PCAP_NETMASK_UNKNOWN) == -1) {
     fprintf(stderr, "Couldn't parse filter %s: %s\n", filter, pcap_geterr(handle));
     return(2);
   }
+  
+  printf("capture(): pre-filter application\n");
   
   /// Apply the filter
   if (pcap_setfilter(handle, &fp) == -1) {
@@ -359,10 +369,17 @@ int capture(pcf_config *config)
     signal(SIGALRM, stop_capturing);
     alarm(config->time);
   }
+  
+  printf("capture(): initializing computer_info_list 1\n");
 
   computer_info_list computers(config->active, config->database, config->block, config->time_limit, config->threshold);
   gnuplot_graph graph_creator;
+  
+  printf("capture(): initializing computer_info_list 2\n");
+  
   computers.add_observer(&graph_creator);
+  
+  printf("capture(): initializing computer_info_list 3\n");
 
   /// Set interrupt signal (ctrl-c or SIGTERM during capturing means stop capturing)
   struct sigaction sigact;

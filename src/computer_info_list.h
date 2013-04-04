@@ -24,18 +24,23 @@
 #include "clock_skew_guard.h"
 #include "observer.h"
 
+class computer_info;
+
 /**
  * All informations known about a set of computers.
  */
-class computer_info_list {
+class computer_info_list : public observable<const computer_skew> {
   // Attributes
   private:
     /// Informations about packet timing
     std::list<computer_info *> computers;
     /// Informations about clock skew
-    clock_skew_guard skews;
+    // clock_skew_guard skews;
     /// Last time when inactive computers were detected
     double last_inactive;
+
+    /// Filename of DB with saved computers
+    const char *saved_computers;
 
     // Program configuration
     // Filenames of databases
@@ -48,11 +53,21 @@ class computer_info_list {
      * and the tracking is restarted
      */
     const int TIME_LIMIT;
+    
+    /**
+     * Number of PPM that controls if more addresses are treated as if they
+     * belong to the same computer.
+     */
+    const double THRESHOLD;
+    
+    void construct_notify(const std::string &ip, const identity_container &identitites, const skew &s) const;
+    
+    skew * getSkew(std::string ip);
 
   // Constructors
   public:
     computer_info_list(char *_active, char *saved_computers_db, int _block, int _time_limit, double _threshold):
-      skews(_threshold, saved_computers_db), last_inactive(time(NULL)), active(_active), block(_block), TIME_LIMIT(_time_limit)
+      last_inactive(time(NULL)), active(_active), block(_block), TIME_LIMIT(_time_limit), THRESHOLD(_threshold)
     {}
 
   // Destructor
@@ -75,9 +90,27 @@ class computer_info_list {
      *
      * @param[in] obs The observer to be added
      */
-    void add_observer(observer<const computer_skew>* obs)
+    /*void add_observer(observer<const computer_skew>* obs)
     {
-      skews.add_observer(obs);
+      this->add_observer(obs);
+    }*/
+    
+    /**
+     * Adds or updates clock skew value of a address
+     * @param[in] ip The IP address for which the clock skew is provided
+     * @param[in] skew Clock skew of the IP address
+     */
+    void update_skew(const std::string &ip, const skew &s);
+
+    /**
+     * Returns IP addresses with similar clock skew to the IP address provided
+     * @param[in] ip The IP whose clock skew will be compared
+     */
+    const identity_container get_similar_identities(const std::string &ip);
+
+    /// Returns THRESHOLD
+    double get_threshold() {
+      return THRESHOLD;
     }
 
 };

@@ -36,10 +36,10 @@ const double SKEW_VALID_AFTER = 5*60;
 
 computer_info::computer_info(double first_packet_delivered, uint32_t first_packet_timstamp,
     const char* its_address, const int its_block_size):
-  packets(), address(its_address), freq(0),
+  packets(), freq(0),
   last_packet_time(first_packet_delivered), last_confirmed_skew(first_packet_delivered),
   confirmed_skew(UNDEFINED_SKEW, UNDEFINED_SKEW),
-  start_time(first_packet_delivered), skew_list(), block_size(its_block_size)
+  start_time(first_packet_delivered), skew_list(), block_size(its_block_size), address(its_address)
 {
   insert_packet(first_packet_delivered, first_packet_timstamp);
   add_empty_skew(packets.begin());
@@ -67,19 +67,19 @@ void computer_info::insert_packet(double packet_delivered, uint32_t timestamp)
 #endif
 }
 
-void computer_info::insert_packet(double packet_delivered, uint32_t timestamp, clock_skew_guard &skews)
+void computer_info::insert_packet2(double packet_delivered, uint32_t timestamp)
 {
   insert_packet(packet_delivered, timestamp);
 
   if (((get_packets_count() % block_size) == 0) ||
       ((packet_delivered - last_confirmed_skew) > SKEW_VALID_AFTER)) {
-    block_finished(packet_delivered, skews);
+    block_finished(packet_delivered);
   }
 }
 
 
 
-void computer_info::block_finished(double packet_delivered, clock_skew_guard &skews)
+void computer_info::block_finished(double packet_delivered)
 {
   // Set frequency
   if (freq == 0) {
@@ -131,7 +131,8 @@ void computer_info::block_finished(double packet_delivered, clock_skew_guard &sk
     printf("%s: clock skew in last period (%g, %g)\n",
         address.c_str(), last_skew_pair.first, last_skew_pair.second);
 #endif
-    if ((std::fabs(last_skew_pair.first - confirmed_skew.first) < 10*skews.get_threshold()) ||
+    // TODO: update threshold
+    if ((std::fabs(last_skew_pair.first - confirmed_skew.first) < 10*0.001) ||
         (std::isnan(confirmed_skew.first))) {
       // New skew confirmed
       confirmed_skew.first = new_skew.first;
@@ -177,7 +178,7 @@ void computer_info::block_finished(double packet_delivered, clock_skew_guard &sk
     }
   }
   s.set_end_time(packets.rbegin()->offset.x + get_start_time());
-  skews.update_skew(address, s);
+  last_calculated_skew = s;
 }
 
 

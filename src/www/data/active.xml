@@ -1,9 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<computers><computer skew="0.499421"><address>192.168.0.38</address><frequency>100</frequency><packets>931</packets><date>Thu Apr  4 18:33:00 2013
-</date></computer><computer skew="-0.004176"><address>192.168.0.54</address><frequency>250</frequency><packets>982</packets><date>Thu Apr  4 18:33:00 2013
-</date></computer><computer skew="0.493836"><address>192.168.0.56</address><frequency>100</frequency><packets>348</packets><date>Thu Apr  4 18:33:00 2013
-</date></computer><computer skew="0.521318"><address>192.168.0.64</address><frequency>250</frequency><packets>458</packets><date>Thu Apr  4 18:29:27 2013
-</date></computer><computer skew="0.000026"><address>192.168.0.49</address><frequency>250</frequency><packets>389</packets><date>Thu Apr  4 18:28:24 2013
-</date></computer><computer skew="0.546962"><address>192.168.0.101</address><frequency>250</frequency><packets>288</packets><date>Thu Apr  4 18:20:08 2013
-</date></computer><computer skew="0.552408"><address>192.168.0.100</address><frequency>250</frequency><packets>262</packets><date>Thu Apr  4 18:25:33 2013
-</date></computer></computers>
+<computers/>
