@@ -17,6 +17,8 @@
       <in>ComputerInfo.h</in>
       <in>ComputerInfoList.cc</in>
       <in>ComputerInfoList.h</in>
+      <in>Configurator.cc</in>
+      <in>Configurator.h</in>
       <in>PacketSegment.h</in>
       <in>PacketTimeInfo.h</in>
       <in>TimeSegment.h</in>
@@ -26,25 +28,14 @@
       <in>capture.h</in>
       <in>check_computers.cc</in>
       <in>check_computers.h</in>
-      <in>clock_skew.h</in>
       <in>computations.cc</in>
       <in>computations.h</in>
-      <in>computer_info.cc</in>
-      <in>computer_info.h</in>
-      <in>computer_info_list.cc</in>
-      <in>computer_info_list.h</in>
-      <in>computer_skew.h</in>
       <in>gnuplot_graph.cc</in>
       <in>gnuplot_graph.h</in>
       <in>log_reader.cc</in>
       <in>main.cc</in>
       <in>observer.h</in>
-      <in>packet_time_info.h</in>
-      <in>parse_config.cc</in>
-      <in>parse_config.h</in>
       <in>point2d.h</in>
-      <in>skew.cc</in>
-      <in>skew.h</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

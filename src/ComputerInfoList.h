@@ -42,7 +42,7 @@ class ComputerInfoList : public observable<const AnalysisInfo> {
 
     // Program configuration
     // Filenames of databases
-    char *active;
+    //char *active;
 
     /// Number of packets in one block
     const int block;
@@ -65,7 +65,7 @@ class ComputerInfoList : public observable<const AnalysisInfo> {
   // Constructors
   public:
     ComputerInfoList(char *_active, char *saved_computers_db, int _block, int _time_limit, double _threshold):
-      last_inactive(time(NULL)), active(_active), block(_block), TIME_LIMIT(_time_limit), THRESHOLD(_threshold)
+      last_inactive(time(NULL)),  block(_block), TIME_LIMIT(_time_limit), THRESHOLD(_threshold)
     {}
 
   // Destructor

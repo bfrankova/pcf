@@ -19,9 +19,9 @@
 
 program = pcf
 
-OBJ = capture.o main.o ComputerInfoList.o parse_config.o computations.o check_computers.o ComputerInfo.o gnuplot_graph.o TimeSegmentList.o
-LOG_READER_OBJ = log_reader.o ComputerInfoList.o parse_config.o computations.o check_computers.o ComputerInfo.o gnuplot_graph.o TimeSegmentList.o
-HEAD = capture.h ComputerInfoList.h parse_config.h computations.h check_computers.h ComputerInfo.h PacketTimeInfo.h point2d.h observer.h TimeSegment.h AnalysisInfo.h gnuplot_graph.h TimeSegmentList.h
+OBJ = capture.o main.o ComputerInfoList.o Configurator.o computations.o check_computers.o ComputerInfo.o gnuplot_graph.o TimeSegmentList.o
+LOG_READER_OBJ = log_reader.o ComputerInfoList.o Configurator.o computations.o check_computers.o ComputerInfo.o gnuplot_graph.o TimeSegmentList.o
+HEAD = capture.h ComputerInfoList.h Configurator.h computations.h check_computers.h ComputerInfo.h PacketTimeInfo.h point2d.h observer.h TimeSegment.h AnalysisInfo.h gnuplot_graph.h TimeSegmentList.h
 OPT = -lpcap -lm `xml2-config --cflags --libs`
 CC = g++
 DEFINE ?= 

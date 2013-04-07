@@ -36,6 +36,7 @@
 #include "capture.h"
 #include "ComputerInfoList.h"
 #include "gnuplot_graph.h"
+#include "Configurator.h"
 
 /// Capture all packets on the wire
 #define PROMISC 1
@@ -46,41 +47,13 @@ pcap_t *handle;
 // IPv6 addr length (39B) + '\0' + some padding
 #define ADDRESS_SIZE 64
 
-/**
- * Signal handler to stop capturing
- */
-void stop_capturing(int signum);
-
-/**
- * Get Actual time
- * @return Actual time in seconds
- */
-//double get_time();
-
-/** 
- * Callback function for pcap
- * @param[in] args User params
- * @param[in] header Packet header
- * @param[in] packet Packet
- */
-void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
-
-/**
- * Making filter string
- * @param[in,out] filter String with filter
- * @param[in] add String to add
- * @param[in,out] length Filter string length
- * @return 0 if ok
- */
-int add_to_filter(char *filter, const char *add, int *length);
-
 
 void stop_capturing(int signum)
 {
   pcap_breakloop(handle);
 }
 
-/*
+
 double get_time()
 {
   struct timeval tv;
@@ -89,7 +62,7 @@ double get_time()
   
   return result;
 }
-*/
+
 
 int add_to_filter(char *filter, const char *add, int *length)
 {
@@ -229,7 +202,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 }
 
 
-int capture(pcf_config *config)
+int capture()
 {
   // Dot notation network address
   char *net;
@@ -253,7 +226,7 @@ int capture(pcf_config *config)
 
   
   /// Set the device
-  char *dev = config->dev;
+  char *dev = Configurator::instance()->dev;
   if (strcmp(dev, "") == 0) {
     dev = pcap_lookupdev(errbuf);
     if (dev == NULL) {
@@ -311,33 +284,33 @@ int capture(pcf_config *config)
   // TCP header with options and (very likely) with timestamps
   add_to_filter(filter, " && ((tcp[12] >= 120) || (ip6[52] >= 120)) ", &length);
   // Port
-  if (config->port != 0) {
+  if (Configurator::instance()->port != 0) {
     add_to_filter(filter, " && port ", &length);
-    sprintf(tmp, "%d", config->port);
+    sprintf(tmp, "%d", Configurator::instance()->port);
     add_to_filter(filter, tmp, &length);
   }
   // Src
-  if (strcmp(config->src, "") != 0) {
+  if (strcmp(Configurator::instance()->src, "") != 0) {
     add_to_filter(filter, " && src host ", &length);
-    add_to_filter(filter, config->src, &length);
+    add_to_filter(filter, Configurator::instance()->src, &length);
   }
   // Dst
-  if (strcmp(config->dst, "") != 0) {
+  if (strcmp(Configurator::instance()->dst, "") != 0) {
     add_to_filter(filter, " && dst host ", &length);
-    add_to_filter(filter, config->dst, &length);
+    add_to_filter(filter, Configurator::instance()->dst, &length);
   }
   // SYN
-  if (config->syn == 1) {
+  if (Configurator::instance()->syn == 1) {
     add_to_filter(filter, " && tcp[tcpflags] & tcp-syn == tcp-syn ", &length);
   }
   // ACK	
-  if (config->ack == 1) {
+  if (Configurator::instance()->ack == 1) {
     add_to_filter(filter, " && tcp[tcpflags] & tcp-ack == tcp-ack ", &length);
   }
   // Filter
-  if (strcmp(config->filter, "") != 0) {
+  if (strcmp(Configurator::instance()->filter, "") != 0) {
     add_to_filter(filter, " && ", &length);
-    add_to_filter(filter, config->filter, &length);
+    add_to_filter(filter, Configurator::instance()->filter, &length);
   }
   filter[length] = '\0';
   
@@ -365,14 +338,14 @@ int capture(pcf_config *config)
   free(filter);
   
   /// Set alarm (if any)
-  if (config->time > 0) {
+  if (Configurator::instance()->time > 0) {
     signal(SIGALRM, stop_capturing);
-    alarm(config->time);
+    alarm(Configurator::instance()->time);
   }
   
   printf("capture(): initializing computer_info_list 1\n");
 
-  ComputerInfoList computers(config->active, config->database, config->block, config->time_limit, config->threshold);
+  ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->time_limit, Configurator::instance()->threshold);
   gnuplot_graph graph_creator;
   
   printf("capture(): initializing computer_info_list 2\n");
@@ -409,7 +382,7 @@ int capture(pcf_config *config)
   printf("Capturing started at: %s\n", ctime(&rawtime));
   
   /// Start capturing
-  if (pcap_loop(handle, config->number, got_packet, reinterpret_cast<u_char*>(&computers)) == -1) {
+  if (pcap_loop(handle, Configurator::instance()->number, got_packet, reinterpret_cast<u_char*>(&computers)) == -1) {
     fprintf(stderr, "An error occured during capturing: %s\n", pcap_geterr(handle));
     return(2);
   }

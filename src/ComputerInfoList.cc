@@ -90,7 +90,7 @@ void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
   if (!found) {
     ComputerInfo *new_computer = new ComputerInfo(ttime, timestamp, address, block);
     computers.push_back(new_computer);
-    save_active(computers, active, *this);
+    //save_active(computers, active, *this);
   }
 
   if (ttime > (last_inactive + TIME_LIMIT / 4)) {
@@ -102,7 +102,7 @@ void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
       }
     }
 
-    save_active(computers, active, *this);
+    //save_active(computers, active, *this);
     last_inactive = ttime;
   }
 }
