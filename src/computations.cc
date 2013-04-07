@@ -24,7 +24,7 @@
 #include <math.h>
 
 #include "point2d.h"
-#include "packet_time_info.h"
+#include "PacketTimeInfo.h"
 
 
 /**
@@ -85,7 +85,7 @@ point2d *convex_hull(point2d points[], unsigned long *number)
 }
 
 
-void set_offset(packet_time_info &packet, const packet_time_info &head, int freq)
+void set_offset(PacketTimeInfo &packet, const PacketTimeInfo &head, int freq)
 {
   double tmp;
 

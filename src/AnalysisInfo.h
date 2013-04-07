@@ -17,44 +17,23 @@
  * along with pcf. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CLOCK_SKEW_GUARD_H
-#define _CLOCK_SKEW_GUARD_H
+#ifndef _ANALYSIS_INFO_H
+#define _ANALYSIS_INFO_H
 
-#include <map>
 #include <string>
+#include <list>
 
-#include "clock_skew.h"
-#include "computer_skew.h"
-#include "observer.h"
-#include "skew.h"
+#include "TimeSegment.h"
+#include "TimeSegmentList.h"
 
 /**
- * This class stores information about current known clock skew values
+ * Structure that is used to transfer computed data about one computer
+ * between classes.
  */
-class clock_skew_guard: public observable<const computer_skew>
-{
-  // Attributes
-  private:
-    
-
-  // Constructors, destructors
-  public:
-    /**
-     * Constructor
-     *
-     * @param[in] threshold Number of PPM that means that the address belongs to the same computer
-     */
-    //clock_skew_guard(const double threshold, const char* saved_computers_db): THRESHOLD(threshold), saved_computers(saved_computers_db) {}
-
-    //~clock_skew_guard() {}
-
-  // Private methods
-  private:
-    
-
-  // Public methods
-  public:
-    
+class AnalysisInfo {
+public:
+  const std::string& address;
+  identity_container similar_identities;
+  const TimeSegmentList clock_skew;
 };
-
 #endif

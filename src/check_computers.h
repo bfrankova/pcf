@@ -20,8 +20,8 @@
 #ifndef _CHECK_COMPUTERS_H
 #define _CHECK_COMPUTERS_H
 
-#include "clock_skew.h"
-#include "computer_info_list.h"
+#include "TimeSegment.h"
+#include "ComputerInfoList.h"
 
 /**
  * Search for computers with similar skew in saved computers
@@ -39,6 +39,6 @@ bool find_computer_in_saved(double referenced_skew, identity_container &identiti
  * @param[in] Active Fileneame of the database with active computers
  * @return 0 if ok
  */
-int save_active(const std::list<computer_info *> &all_computers, const char *active, computer_info_list &computers);
+int save_active(const std::list<ComputerInfo *> &all_computers, const char *active, ComputerInfoList &computers);
 
 #endif

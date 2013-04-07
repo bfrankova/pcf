@@ -30,8 +30,8 @@
 #include <string.h>
 
 #include "check_computers.h"
-#include "computer_info.h"
-#include "clock_skew.h"
+#include "ComputerInfo.h"
+#include "TimeSegment.h"
 
 
 #define MY_ENCODING "UTF-8"
@@ -145,7 +145,7 @@ bool find_computer_in_saved(double referenced_skew, identity_container &identiti
   return true;
 }
 
-int save_active(const std::list<computer_info *> &all_computers, const char *active, computer_info_list &computers)
+int save_active(const std::list<ComputerInfo *> &all_computers, const char *active, ComputerInfoList &computers)
 {
   xmlDocPtr doc;
   xmlNodePtr nodeptr = NULL, node = NULL, node_child = NULL;

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="80">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df name="src" root=".">
+      <df name="graph">
+      </df>
+      <df name="log">
+      </df>
+      <df name="www">
+        <df name="data">
+        </df>
+        <df name="graph">
+        </df>
+      </df>
+      <in>AnalysisInfo.h</in>
+      <in>ComputerInfo.cc</in>
+      <in>ComputerInfo.h</in>
+      <in>ComputerInfoList.cc</in>
+      <in>ComputerInfoList.h</in>
+      <in>PacketSegment.h</in>
+      <in>PacketTimeInfo.h</in>
+      <in>TimeSegment.h</in>
+      <in>TimeSegmentList.cc</in>
+      <in>TimeSegmentList.h</in>
+      <in>capture.cc</in>
+      <in>capture.h</in>
+      <in>check_computers.cc</in>
+      <in>check_computers.h</in>
+      <in>clock_skew.h</in>
+      <in>computations.cc</in>
+      <in>computations.h</in>
+      <in>computer_info.cc</in>
+      <in>computer_info.h</in>
+      <in>computer_info_list.cc</in>
+      <in>computer_info_list.h</in>
+      <in>computer_skew.h</in>
+      <in>gnuplot_graph.cc</in>
+      <in>gnuplot_graph.h</in>
+      <in>log_reader.cc</in>
+      <in>main.cc</in>
+      <in>observer.h</in>
+      <in>packet_time_info.h</in>
+      <in>parse_config.cc</in>
+      <in>parse_config.h</in>
+      <in>point2d.h</in>
+      <in>skew.cc</in>
+      <in>skew.h</in>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>default</compilerSet>
+      </toolsSet>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath></executablePath>
+        </makeTool>
+      </makefileType>
+      <item path="check_computers.cc" ex="false" tool="1" flavor="0">
+        <ccTool>
+          <incDir>
+            <pElem>/usr/include/libxml2</pElem>
+          </incDir>
+        </ccTool>
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

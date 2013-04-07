@@ -25,14 +25,21 @@
 
 #include "point2d.h"
 
+
 /**
  * Time information about each packet
  */
-struct packet_time_info {
+class PacketTimeInfo {
   public:
     double time;
     uint32_t timestamp;
     point2d offset;
 };
+
+/**
+ * Typedef for a list of all packets known for one computer.
+ */
+typedef std::list<PacketTimeInfo> packet_time_info_list;
+typedef packet_time_info_list::iterator packet_iterator;
 
 #endif

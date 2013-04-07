@@ -19,9 +19,9 @@
 
 #include <algorithm>
 
-#include "skew.h"
+#include "TimeSegmentList.h"
 
-bool skew::is_similar_with(const skew &other, const double THRESHOLD) const
+bool TimeSegmentList::is_similar_with(const TimeSegmentList &other, const double THRESHOLD) const
 {
   if (is_constant() && other.is_constant()) {
     return similar_alpha(atoms.begin()->alpha, other.atoms.begin()->alpha, THRESHOLD);
@@ -32,13 +32,13 @@ bool skew::is_similar_with(const skew &other, const double THRESHOLD) const
 
 
 
-bool skew::compare_changing(const skew &other, const double THRESHOLD) const
+bool TimeSegmentList::compare_changing(const TimeSegmentList &other, const double THRESHOLD) const
 {
   double both_active = 0.0;
   double similar_skew = 0.0;
 
-  auto itt = atoms.begin();
-  auto ito = other.atoms.begin();
+  std::list<TimeSegment>::const_iterator itt = atoms.begin();
+  std::list<TimeSegment>::const_iterator ito = other.atoms.begin();
 
   while (itt != atoms.end() && ito != other.atoms.end()) {
     if (itt->end_time < ito->start_time) {

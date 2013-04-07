@@ -20,17 +20,17 @@
 #ifndef _GNUPLOT_GRAPH_H
 #define _GNUPLOT_GRAPH_H
 
-#include "clock_skew.h"
-#include "computer_skew.h"
+#include "TimeSegment.h"
+#include "AnalysisInfo.h"
 #include "observer.h"
 
-class gnuplot_graph: public observer<const computer_skew>
+class gnuplot_graph: public observer<const AnalysisInfo>
 {
   public:
-    virtual void notify(const computer_skew& changed_skew);
+    virtual void notify(const AnalysisInfo& changed_skew);
 
   private:
-    void generate_graph(const computer_skew& changed_skew);
+    void generate_graph(const AnalysisInfo& changed_skew);
 };
 
 #endif

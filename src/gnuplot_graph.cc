@@ -21,7 +21,7 @@
 #include <ctime>
 #include <string>
 
-#include "clock_skew.h"
+#include "TimeSegment.h"
 #include "gnuplot_graph.h"
 
 const size_t STRLEN_MAX = 100;
@@ -32,7 +32,7 @@ void time_to_str(char *buffer, size_t buffer_size, time_t time)
   strftime(buffer, buffer_size, "%Y-%m-%d %H:%M:%S", &time_data);
 }
 
-void gnuplot_graph::notify(const computer_skew& changed_skew)
+void gnuplot_graph::notify(const AnalysisInfo& changed_skew)
 {
 #ifdef DEBUG
   printf("gnuplot_graph::notify %s\n", changed_skew.address.c_str());
@@ -41,10 +41,10 @@ void gnuplot_graph::notify(const computer_skew& changed_skew)
 }
 
 
-void gnuplot_graph::generate_graph(const computer_skew &changed_skew)
+void gnuplot_graph::generate_graph(const AnalysisInfo &changed_skew)
 {
   const std::string& address = changed_skew.address;
-  const skew& computer_skew = changed_skew.clock_skew;
+  const TimeSegmentList& computer_skew = changed_skew.clock_skew;
 
   static const char* filename_template =  "graph/%s.gp";
   FILE *f;
@@ -187,7 +187,8 @@ void gnuplot_graph::generate_graph(const computer_skew &changed_skew)
   int gnuplot_max = strlen(gnuplot_template) + address.length();
   char gnuplot_cmd[gnuplot_max + 1];
   snprintf(gnuplot_cmd, gnuplot_max, gnuplot_template, address.c_str());
-  system(gnuplot_cmd);
+  if(system(gnuplot_cmd) < 0)
+      fprintf(stderr, "Error while launching gnuplot\n");
   
   return;
 }

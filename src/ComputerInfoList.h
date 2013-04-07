@@ -20,20 +20,18 @@
 #ifndef _COMPUTER_INFO_LIST_H
 #define _COMPUTER_INFO_LIST_H
 
-#include "computer_info.h"
-#include "clock_skew_guard.h"
+#include "ComputerInfo.h"
+#include "AnalysisInfo.h"
 #include "observer.h"
-
-class computer_info;
 
 /**
  * All informations known about a set of computers.
  */
-class computer_info_list : public observable<const computer_skew> {
+class ComputerInfoList : public observable<const AnalysisInfo> {
   // Attributes
   private:
     /// Informations about packet timing
-    std::list<computer_info *> computers;
+    std::list<ComputerInfo *> computers;
     /// Informations about clock skew
     // clock_skew_guard skews;
     /// Last time when inactive computers were detected
@@ -60,19 +58,19 @@ class computer_info_list : public observable<const computer_skew> {
      */
     const double THRESHOLD;
     
-    void construct_notify(const std::string &ip, const identity_container &identitites, const skew &s) const;
+    void construct_notify(const std::string &ip, const identity_container &identitites, const TimeSegmentList &s) const;
     
-    skew * getSkew(std::string ip);
+    TimeSegmentList * getSkew(std::string ip);
 
   // Constructors
   public:
-    computer_info_list(char *_active, char *saved_computers_db, int _block, int _time_limit, double _threshold):
+    ComputerInfoList(char *_active, char *saved_computers_db, int _block, int _time_limit, double _threshold):
       last_inactive(time(NULL)), active(_active), block(_block), TIME_LIMIT(_time_limit), THRESHOLD(_threshold)
     {}
 
   // Destructor
   public:
-    ~computer_info_list();
+    ~ComputerInfoList();
 
   // Public methods
   public:
@@ -100,7 +98,7 @@ class computer_info_list : public observable<const computer_skew> {
      * @param[in] ip The IP address for which the clock skew is provided
      * @param[in] skew Clock skew of the IP address
      */
-    void update_skew(const std::string &ip, const skew &s);
+    void update_skew(const std::string &ip, const TimeSegmentList &s);
 
     /**
      * Returns IP addresses with similar clock skew to the IP address provided

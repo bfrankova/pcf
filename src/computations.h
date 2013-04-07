@@ -20,8 +20,8 @@
 #ifndef _COMPUTATIONS_H
 #define _COMPUTATIONS_H
 
-#include "computer_info.h"
-#include "packet_time_info.h"
+#include "ComputerInfo.h"
+#include "PacketTimeInfo.h"
 
 
 /**
@@ -30,7 +30,7 @@
  * @param[in] head First packet
  * @param[in] freq Frequency
  */
-void set_offset(packet_time_info &packet, const packet_time_info &head, int freq);
+void set_offset(PacketTimeInfo &packet, const PacketTimeInfo &head, int freq);
 
 /**
  * Compute upper bound as a upper convex hull. Graham scan algorithm is used.

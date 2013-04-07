@@ -24,33 +24,20 @@
 #include <string>
 #include <utility>
 
-#include "clock_skew.h"
-#include "clock_skew_guard.h"
-#include "packet_time_info.h"
+#include "TimeSegment.h"
+#include "PacketTimeInfo.h"
+#include "PacketSegment.h"
+#include "TimeSegmentList.h"
 
 
-/**
- * Typedef for a list of all packets known for one computer.
- */
-typedef std::list<packet_time_info> packet_time_info_list;
-typedef packet_time_info_list::iterator packet_iterator;
 
 /**
  * All informations known about each computer including time information about all received packets.
  */
-class computer_info {
+class ComputerInfo {
 
   // Private types
   private:
-    /// Structure describing clock skew
-    struct skew_info {
-      double alpha;
-      double beta;
-      packet_iterator first;
-      packet_iterator confirmed;
-      packet_iterator last;
-    };
-
     /// Clock skew pair (alpha, beta): y = alpha*x + beta
     typedef std::pair<double, double> clock_skew_pair;
 
@@ -67,7 +54,7 @@ class computer_info {
     double last_packet_time;
 
     /// Time of the packet with last confirmed skew
-    double last_confirmed_skew;
+    double last_confirmed_skew_packet_time;
 
     /// Last confirmed skew
     clock_skew_pair confirmed_skew;
@@ -76,7 +63,7 @@ class computer_info {
     double start_time;
 
     /// Skew information about one computer
-    std::list<skew_info> skew_list;
+    std::list<PacketSegment> skew_list;
 
     /**
      * Number of packets in one block
@@ -86,12 +73,12 @@ class computer_info {
 
   // Constructors
   public:
-    computer_info(double first_packet_delivered, uint32_t first_packet_timstamp,
+    ComputerInfo(double first_packet_delivered, uint32_t first_packet_timstamp,
         const char* its_address, const int its_block_size);
 
   // Destructor
   public:
-    ~computer_info() {}
+    ~ComputerInfo() {}
 
   // Getters
   public:
@@ -128,17 +115,17 @@ class computer_info {
       return packets.rbegin()->timestamp;
     }
 
-    const skew_info& get_skew() const
+    const PacketSegment& get_skew() const
     {
       return *(skew_list.rbegin());
     }
     
-    skew known_skew;
+    TimeSegmentList known_skew;
 
   // Functions manipulating the state
   public:
     //
-    skew last_calculated_skew;
+    TimeSegmentList last_calculated_skew;
       
     /**
      * Adds a new packet without updating or recomputing anything

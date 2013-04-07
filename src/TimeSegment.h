@@ -27,7 +27,7 @@
 /**
  * Clock skew y = alpha*x + beta, valid in certain time
  */
-struct clock_skew_atom
+struct TimeSegment
 {
   double alpha;
   double beta;
@@ -37,7 +37,7 @@ struct clock_skew_atom
   double relative_start_time;
   double relative_end_time;
 
-  bool operator==(const clock_skew_atom &other) const
+  bool operator==(const TimeSegment &other) const
   {
     return alpha == other.alpha &&
       beta == other.beta &&
@@ -45,14 +45,15 @@ struct clock_skew_atom
       end_time == other.end_time;
   }
 
-  bool operator!=(const clock_skew_atom &other) const
+  bool operator!=(const TimeSegment &other) const
   {
     return !(*this == other);
   }
 };
 
 
-/**
+/** TODO: move to global helper
+ * 
  * Containter for identitites of a computer.
  *
  * It is usually an IP address or an arbitrary name of a computer.
@@ -60,7 +61,8 @@ struct clock_skew_atom
 typedef std::set<std::string> identity_container;
 
 
-/**
+/** TODO: move to global helper
+ * 
  * Undefined skew
  */
 const double UNDEFINED_SKEW = std::numeric_limits<double>().quiet_NaN();

@@ -21,11 +21,11 @@
 #include <cmath>
 #include <iostream>
 
-#include "computer_info_list.h"
+#include "ComputerInfoList.h"
 #include "check_computers.h"
 
 
-computer_info_list::~computer_info_list()
+ComputerInfoList::~ComputerInfoList()
 {
   /*for (auto it = computers.begin(); it != computers.end(); ++it) {
     delete *it;
@@ -34,7 +34,7 @@ computer_info_list::~computer_info_list()
 
 
 
-void computer_info_list::new_packet(const char *address, double ttime, uint32_t timestamp)
+void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t timestamp)
 {
   static unsigned long total = 0;
   // printf("%lu packets captured\n", ++total);
@@ -42,14 +42,14 @@ void computer_info_list::new_packet(const char *address, double ttime, uint32_t 
   fflush(stdout);
 
   bool found = false;
-  for (std::list<computer_info *>::iterator it = computers.begin(); it != computers.end(); ++it) {
+  for (std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it) {
     if ((*it)->get_address() != address) {
       continue;
     }
     found = true;
 
     // Computer already known
-    computer_info &known_computer = **it;
+    ComputerInfo &known_computer = **it;
 
     /// Too much time since last packet so start from the beginning
     if ((ttime - known_computer.get_last_packet_time()) > TIME_LIMIT) {
@@ -88,14 +88,14 @@ void computer_info_list::new_packet(const char *address, double ttime, uint32_t 
   }
 
   if (!found) {
-    computer_info *new_computer = new computer_info(ttime, timestamp, address, block);
+    ComputerInfo *new_computer = new ComputerInfo(ttime, timestamp, address, block);
     computers.push_back(new_computer);
     save_active(computers, active, *this);
   }
 
   if (ttime > (last_inactive + TIME_LIMIT / 4)) {
     /// Save active computers
-    for (std::list<computer_info *>::iterator it = computers.begin(); it != computers.end(); ++it) {
+    for (std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it) {
       if (ttime - (*it)->get_last_packet_time() > TIME_LIMIT) {
         delete(*it);
         it = computers.erase(it);
@@ -107,16 +107,16 @@ void computer_info_list::new_packet(const char *address, double ttime, uint32_t 
   }
 }
 
-void computer_info_list::construct_notify(const std::string &ip, const identity_container &identitites, const skew &s) const
+void ComputerInfoList::construct_notify(const std::string &ip, const identity_container &identitites, const TimeSegmentList &s) const
 {
-  computer_skew cs = {ip, identitites, s};
+  AnalysisInfo cs = {ip, identitites, s};
   notify(cs);
 }
 
 
-skew * computer_info_list::getSkew(std::string ip)
+TimeSegmentList * ComputerInfoList::getSkew(std::string ip)
 {
-    for(std::list<computer_info *>::iterator it = computers.begin(); it != computers.end(); ++it)
+    for(std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it)
     {
         if( (*it)->address == ip )
         {
@@ -127,12 +127,12 @@ skew * computer_info_list::getSkew(std::string ip)
 }
 
 
-void computer_info_list::update_skew(const std::string &ip, const skew &s)
+void ComputerInfoList::update_skew(const std::string &ip, const TimeSegmentList &s)
 {
   identity_container old_identities = get_similar_identities(ip);
 
   // Update database, be it a new address or an update
-  skew * target_skew = getSkew(ip);
+  TimeSegmentList * target_skew = getSkew(ip);
   
   if(target_skew == NULL) 
   {
@@ -163,11 +163,11 @@ void computer_info_list::update_skew(const std::string &ip, const skew &s)
 
 
 
-const identity_container computer_info_list::get_similar_identities(const std::string &ip)
+const identity_container ComputerInfoList::get_similar_identities(const std::string &ip)
 {
   identity_container identities;
 
-  skew * reference_skew = getSkew(ip);
+  TimeSegmentList * reference_skew = getSkew(ip);
   if (reference_skew == NULL) {
     // Given address is not known
     return identities;
@@ -177,7 +177,7 @@ const identity_container computer_info_list::get_similar_identities(const std::s
     find_computer_in_saved(reference_skew->get_last_alpha(), identities, THRESHOLD, saved_computers);
   }
   
-  for(std::list<computer_info *>::iterator it = computers.begin(); it != computers.end(); ++it)
+  for(std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it)
     {
         if( (*it)->address == ip )
         {

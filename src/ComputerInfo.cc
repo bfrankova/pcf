@@ -23,21 +23,20 @@
 #include <cstring>
 #include <list>
 
-#include "clock_skew.h"
-#include "clock_skew_guard.h"
+#include "TimeSegment.h"
 #include "computations.h"
-#include "packet_time_info.h"
+#include "PacketTimeInfo.h"
 #include "point2d.h"
-#include "skew.h"
+#include "TimeSegmentList.h"
 
 const size_t STRLEN_MAX = 100;
 
 const double SKEW_VALID_AFTER = 5*60;
 
-computer_info::computer_info(double first_packet_delivered, uint32_t first_packet_timstamp,
+ComputerInfo::ComputerInfo(double first_packet_delivered, uint32_t first_packet_timstamp,
     const char* its_address, const int its_block_size):
   packets(), freq(0),
-  last_packet_time(first_packet_delivered), last_confirmed_skew(first_packet_delivered),
+  last_packet_time(first_packet_delivered), last_confirmed_skew_packet_time(first_packet_delivered),
   confirmed_skew(UNDEFINED_SKEW, UNDEFINED_SKEW),
   start_time(first_packet_delivered), skew_list(), block_size(its_block_size), address(its_address)
 {
@@ -47,9 +46,9 @@ computer_info::computer_info(double first_packet_delivered, uint32_t first_packe
 
 
 
-void computer_info::insert_packet(double packet_delivered, uint32_t timestamp)
+void ComputerInfo::insert_packet(double packet_delivered, uint32_t timestamp)
 { // This method shouldn't suppose that skew_list contain valid information
-  packet_time_info new_packet;
+  PacketTimeInfo new_packet;
 
   new_packet.time = packet_delivered;
   new_packet.timestamp = timestamp;
@@ -67,19 +66,19 @@ void computer_info::insert_packet(double packet_delivered, uint32_t timestamp)
 #endif
 }
 
-void computer_info::insert_packet2(double packet_delivered, uint32_t timestamp)
+void ComputerInfo::insert_packet2(double packet_delivered, uint32_t timestamp)
 {
   insert_packet(packet_delivered, timestamp);
 
   if (((get_packets_count() % block_size) == 0) ||
-      ((packet_delivered - last_confirmed_skew) > SKEW_VALID_AFTER)) {
+      ((packet_delivered - last_confirmed_skew_packet_time) > SKEW_VALID_AFTER)) {
     block_finished(packet_delivered);
   }
 }
 
 
 
-void computer_info::block_finished(double packet_delivered)
+void ComputerInfo::block_finished(double packet_delivered)
 {
   // Set frequency
   if (freq == 0) {
@@ -92,7 +91,7 @@ void computer_info::block_finished(double packet_delivered)
       fprintf(stderr, "Found %s with frequency %d", address.c_str(), freq);
 #endif
 
-      const packet_time_info &first = *(packets.begin());
+      const PacketTimeInfo &first = *(packets.begin());
       if (freq != 0) {
         for (auto it = packets.begin(); it != packets.end(); ++it) {
           set_offset(*it, first, freq);
@@ -108,7 +107,7 @@ void computer_info::block_finished(double packet_delivered)
   save_packets(1);
 
   /// Recompute skew for graph
-  skew_info &last_skew = *skew_list.rbegin();
+  PacketSegment &last_skew = *skew_list.rbegin();
   clock_skew_pair new_skew = compute_skew(last_skew.first, packets.end());
   if (std::isnan(new_skew.first)) {
 #ifdef DEBUG
@@ -125,12 +124,8 @@ void computer_info::block_finished(double packet_delivered)
   last_skew.alpha = new_skew.first;
   last_skew.beta = new_skew.second;
 
-  if ((packet_delivered - last_confirmed_skew) > SKEW_VALID_AFTER) {
+  if ((packet_delivered - last_confirmed_skew_packet_time) > SKEW_VALID_AFTER) {
     clock_skew_pair last_skew_pair = compute_skew(last_skew.confirmed, packets.end());
-#ifdef DEBUG
-    printf("%s: clock skew in last period (%g, %g)\n",
-        address.c_str(), last_skew_pair.first, last_skew_pair.second);
-#endif
     // TODO: update threshold
     if ((std::fabs(last_skew_pair.first - confirmed_skew.first) < 10*0.001) ||
         (std::isnan(confirmed_skew.first))) {
@@ -139,7 +134,7 @@ void computer_info::block_finished(double packet_delivered)
       confirmed_skew.second = new_skew.second;
       last_skew.confirmed = last_skew.last;
       last_skew.last = --packets.end();
-      last_confirmed_skew = packet_delivered;
+      last_confirmed_skew_packet_time = packet_delivered;
 #ifdef DEBUG
       printf("%s: New skew confirmed (%g, %g), time %g\n", address.c_str(),
           confirmed_skew.first, confirmed_skew.second, last_skew.last->offset.x);
@@ -147,7 +142,7 @@ void computer_info::block_finished(double packet_delivered)
 
 #ifndef DONOTREDUCE
       // Reduce packets
-      if (packets.size() > (block_size * 5)) {
+      if (packets.size() > (unsigned int)(block_size * 5)) {
         reduce_packets(last_skew.first, last_skew.confirmed);
       }
 #endif
@@ -161,13 +156,14 @@ void computer_info::block_finished(double packet_delivered)
       add_empty_skew(--packets.end());
       confirmed_skew.first = UNDEFINED_SKEW;
       confirmed_skew.second = UNDEFINED_SKEW;
-      last_confirmed_skew = packet_delivered;
+      last_confirmed_skew_packet_time = packet_delivered;
     }
   }
 
-  skew s;
+  TimeSegmentList s;
   for (auto it = skew_list.begin(); it != skew_list.end(); ++it) {
-    clock_skew_atom atom = {it->alpha, it->beta,
+    TimeSegment atom = {
+       it->alpha, it->beta,
       (it->first)->offset.x + get_start_time(),
       (it->last)->offset.x + get_start_time(),
       (it->first)->offset.x,
@@ -183,7 +179,7 @@ void computer_info::block_finished(double packet_delivered)
 
 
 
-void computer_info::restart(double packet_delivered, uint32_t timestamp)
+void ComputerInfo::restart(double packet_delivered, uint32_t timestamp)
 {
   packets.clear();
   freq = 0;
@@ -196,9 +192,9 @@ void computer_info::restart(double packet_delivered, uint32_t timestamp)
 
 
 
-void computer_info::add_empty_skew(packet_time_info_list::iterator start)
+void ComputerInfo::add_empty_skew(packet_time_info_list::iterator start)
 {
-  skew_info skew;
+  PacketSegment skew;
   skew.alpha = UNDEFINED_SKEW;
   skew.beta = UNDEFINED_SKEW;
   skew.first = start;
@@ -212,7 +208,7 @@ void computer_info::add_empty_skew(packet_time_info_list::iterator start)
 
 
 
-void computer_info::reduce_packets(packet_iterator start, packet_iterator end)
+void ComputerInfo::reduce_packets(packet_iterator start, packet_iterator end)
 {
 #ifdef DEBUG
   printf("Reduction for IP %s start: %u packets\n", address.c_str(), (unsigned int) packets.size());
@@ -274,12 +270,12 @@ void computer_info::reduce_packets(packet_iterator start, packet_iterator end)
 
 
 
-computer_info::clock_skew_pair computer_info::compute_skew(const packet_iterator &start, const packet_iterator &end)
+ComputerInfo::clock_skew_pair ComputerInfo::compute_skew(const packet_iterator &start, const packet_iterator &end)
 {
   // Prepare an array of all points for convex hull computation
   unsigned long pckts_count = get_packets_count();
   point2d points[pckts_count];
-  const packet_time_info &first = *(start);
+  const PacketTimeInfo &first = *(start);
   clock_skew_pair result(UNDEFINED_SKEW, UNDEFINED_SKEW);
 
   /// First point
@@ -385,11 +381,11 @@ computer_info::clock_skew_pair computer_info::compute_skew(const packet_iterator
 
 
 
-int computer_info::compute_freq()
+int ComputerInfo::compute_freq()
 {
   assert(!packets.empty());
 
-  const packet_time_info &first = *packets.begin();
+  const PacketTimeInfo &first = *packets.begin();
 
   double tmp = 0.0;
   int count = 0;
@@ -425,7 +421,7 @@ int computer_info::compute_freq()
 
 
 
-int computer_info::save_packets(short rewrite)
+int ComputerInfo::save_packets(short rewrite)
 {
   FILE *f;
   char filename[50] = "log/";

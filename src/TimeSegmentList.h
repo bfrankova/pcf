@@ -23,14 +23,14 @@
 #include <cmath>
 #include <list>
 
-#include "clock_skew.h"
+#include "TimeSegment.h"
 
-class skew
+class TimeSegmentList
 {
   // Attributes
   private:
     /// List of atomic skews
-    std::list<clock_skew_atom> atoms;
+    std::list<TimeSegment> atoms;
     /**
      * Percentage of similar skew during overlaping periods of two skews so
      * they are considered to be similar. The percentage is actually divided
@@ -44,12 +44,12 @@ class skew
 
   // Constructors, destructors
   public:
-    skew(): atoms(), end_time(0.0) {}
+    TimeSegmentList(): atoms(), end_time(0.0) {}
 
   // Public methods
   public:
     /// Adds new atom
-    void add_atom(const clock_skew_atom &atom)
+    void add_atom(const TimeSegment &atom)
     {
       atoms.push_back(atom);
       set_end_time(atom.end_time);
@@ -88,15 +88,15 @@ class skew
     }
 
     /// Compares if the other skew is similar to this one
-    bool is_similar_with(const skew &other, const double THRESHOLD) const;
+    bool is_similar_with(const TimeSegmentList &other, const double THRESHOLD) const;
 
     /// Iterators to stored atoms
-    std::list<clock_skew_atom>::const_iterator cbegin() const
+    std::list<TimeSegment>::const_iterator cbegin() const
     {
       return atoms.cbegin();
     }
 
-    std::list<clock_skew_atom>::const_iterator cend() const
+    std::list<TimeSegment>::const_iterator cend() const
     {
       return atoms.cend();
     }
@@ -108,7 +108,7 @@ class skew
       return (std::fabs(alpha1 - alpha2) < THRESHOLD);
     }
 
-    bool compare_changing(const skew &other, const double THRESHOLD) const;
+    bool compare_changing(const TimeSegmentList &other, const double THRESHOLD) const;
 };
 
 #endif

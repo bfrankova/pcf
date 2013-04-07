@@ -34,7 +34,7 @@
 #include <netinet/tcp.h>
 
 #include "capture.h"
-#include "computer_info_list.h"
+#include "ComputerInfoList.h"
 #include "gnuplot_graph.h"
 
 /// Capture all packets on the wire
@@ -201,7 +201,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
       arrival_time = header->ts.tv_sec + (header->ts.tv_usec / 1000000.0);
 
       /// Save packet
-      computer_info_list *computers = reinterpret_cast<computer_info_list*>(args);
+      ComputerInfoList *computers = reinterpret_cast<ComputerInfoList*>(args);
       computers->new_packet(address, arrival_time, timestamp);
       return; // Packet processed
     }
@@ -372,7 +372,7 @@ int capture(pcf_config *config)
   
   printf("capture(): initializing computer_info_list 1\n");
 
-  computer_info_list computers(config->active, config->database, config->block, config->time_limit, config->threshold);
+  ComputerInfoList computers(config->active, config->database, config->block, config->time_limit, config->threshold);
   gnuplot_graph graph_creator;
   
   printf("capture(): initializing computer_info_list 2\n");

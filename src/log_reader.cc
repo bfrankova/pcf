@@ -22,7 +22,7 @@
 #include<fstream>
 
 #include "parse_config.h"
-#include "computer_info_list.h"
+#include "ComputerInfoList.h"
 #include "gnuplot_graph.h"
 
 /**
@@ -43,7 +43,7 @@ void print_help()
  */
 void process_log_file(std::ifstream &ifs, pcf_config *config)
 {
-  computer_info_list computers(config->active, config->database, config->block, config->time_limit, config->threshold);
+  ComputerInfoList computers(config->active, config->database, config->block, config->time_limit, config->threshold);
   gnuplot_graph graph_creator;
   computers.add_observer(&graph_creator);
 
