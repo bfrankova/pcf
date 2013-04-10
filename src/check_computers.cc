@@ -36,23 +36,6 @@
 
 #define MY_ENCODING "UTF-8"
 
-
-
-/**
- * Make the main structure of the document
- * @param[in] filename Filename
- * @return 0 if ok
- */
-int first_computer(const char *filename);
-
-/**
- * Conversts time to its string representation in human readable format
- * @param[out] buffer Pre-allocated buffer where the output is stored
- * @param[in] buffer_size Size of the buffer
- * @param[in] time Unix time to be converted
- */
-void time_to_str(char *buffer, size_t buffer_size, time_t time);
-
 int first_computer(const char *filename)
 {
   int rc;
@@ -187,7 +170,7 @@ int save_active(const std::list<ComputerInfo *> &all_computers, const char *acti
     /// <computer skew>
     node = xmlNewNode(NULL, BAD_CAST "computer");
     char tmp[30];
-    sprintf(tmp, "%lf", (*it)->get_skew().alpha);
+    sprintf(tmp, "%lf", (*it)->get_last_packet_segment().alpha);
     xmlNewProp(node, BAD_CAST "skew", BAD_CAST tmp);
     xmlAddChild(nodeptr , node);
 

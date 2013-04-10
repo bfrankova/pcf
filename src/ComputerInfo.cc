@@ -40,10 +40,10 @@ ComputerInfo::ComputerInfo(double first_packet_delivered, uint32_t first_packet_
   packets(), freq(0),
   lastPacketTime(first_packet_delivered), lastConfirmedPacketTime(first_packet_delivered),
   confirmedSkew(UNDEFINED_SKEW, UNDEFINED_SKEW),
-  startTime(first_packet_delivered), packetSkewList(), address(its_address)
+  startTime(first_packet_delivered), packetSegmentList(), address(its_address)
 {
   insert_packet(first_packet_delivered, first_packet_timstamp);
-  add_empty_skew(packets.begin());
+  add_empty_packet_segment(packets.begin());
 }
 
 void ComputerInfo::insert_packet(double packet_delivered, uint32_t timestamp)
@@ -66,19 +66,17 @@ void ComputerInfo::insert_packet(double packet_delivered, uint32_t timestamp)
 #endif
 }
 
-void ComputerInfo::insert_packet2(double packet_delivered, uint32_t timestamp)
+void ComputerInfo::check_block_finish(double packet_delivered)
 {
-  insert_packet(packet_delivered, timestamp);
-
   if (((get_packets_count() % Configurator::instance()->block) == 0) ||
       ((packet_delivered - lastConfirmedPacketTime) > SKEW_VALID_AFTER)) {
-    block_finished(packet_delivered);
+    recompute_block(packet_delivered);
   }
 }
 
 
 
-void ComputerInfo::block_finished(double packet_delivered)
+void ComputerInfo::recompute_block(double packet_delivered)
 {
   // Set frequency
   if (freq == 0) {
@@ -107,7 +105,7 @@ void ComputerInfo::block_finished(double packet_delivered)
   save_packets(1);
 
   /// Recompute skew for graph
-  PacketSegment &last_skew = *packetSkewList.rbegin();
+  PacketSegment &last_skew = *packetSegmentList.rbegin();
   ClockSkewPair new_skew = compute_skew(last_skew.first, packets.end());
   if (std::isnan(new_skew.Alpha)) {
 #ifdef DEBUG
@@ -153,7 +151,7 @@ void ComputerInfo::block_finished(double packet_delivered)
       reduce_packets(last_skew.first, last_skew.confirmed);
 #endif
 
-      add_empty_skew(--packets.end());
+      add_empty_packet_segment(--packets.end());
       confirmedSkew.Alpha = UNDEFINED_SKEW;
       confirmedSkew.Beta = UNDEFINED_SKEW;
       lastConfirmedPacketTime = packet_delivered;
@@ -161,7 +159,7 @@ void ComputerInfo::block_finished(double packet_delivered)
   }
 
   TimeSegmentList s;
-  for (std::list<PacketSegment>::iterator it = packetSkewList.begin(); it != packetSkewList.end(); ++it) {
+  for (std::list<PacketSegment>::iterator it = packetSegmentList.begin(); it != packetSegmentList.end(); ++it) {
     TimeSegment atom = {
        it->alpha, it->beta,
       (it->first)->Offset.x + get_start_time(),
@@ -174,7 +172,7 @@ void ComputerInfo::block_finished(double packet_delivered)
     }
   }
   s.set_end_time(packets.rbegin()->Offset.x + get_start_time());
-  LastCalculatedSkew = s;
+  NewTimeSegmentList = s;
 }
 
 
@@ -185,14 +183,14 @@ void ComputerInfo::restart(double packet_delivered, uint32_t timestamp)
   freq = 0;
   lastPacketTime = packet_delivered;
   startTime = packet_delivered;
-  packetSkewList.clear();
+  packetSegmentList.clear();
   insert_packet(packet_delivered, timestamp);
-  add_empty_skew(packets.begin());
+  add_empty_packet_segment(packets.begin());
 }
 
 
 
-void ComputerInfo::add_empty_skew(packetTimeInfoList::iterator start)
+void ComputerInfo::add_empty_packet_segment(packetTimeInfoList::iterator start)
 {
   PacketSegment skew;
   skew.alpha = UNDEFINED_SKEW;
@@ -200,7 +198,7 @@ void ComputerInfo::add_empty_skew(packetTimeInfoList::iterator start)
   skew.first = start;
   skew.confirmed = start;
   skew.last = --packets.end();
-  packetSkewList.push_back(skew);
+  packetSegmentList.push_back(skew);
 #ifdef DEBUG
   printf("%s: New empty skew first: %g, confirmed %g, last: %g\n", address.c_str(), (skew.first)->Offset.x, (skew.confirmed)->Offset.x, (skew.last)->Offset.x);
 #endif

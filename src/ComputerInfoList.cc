@@ -31,7 +31,6 @@ ComputerInfoList::~ComputerInfoList() {}
 void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t timestamp)
 {
   static unsigned long total = 0;
-  // printf("%lu packets captured\n", ++total);
   printf("\r%lu packets captured", ++total);
   fflush(stdout);
 
@@ -73,8 +72,9 @@ void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
     }
 
     // Insert packet
-    known_computer.insert_packet2(ttime, timestamp);
-    update_skew(address, known_computer.LastCalculatedSkew);
+    known_computer.insert_packet(ttime, timestamp);
+    known_computer.check_block_finish(ttime);
+    update_skew(address, known_computer.NewTimeSegmentList);
 
 #if 0
     std::cerr << known_computer.get_address() << ": " << known_computer.get_packet_count() << std::endl;
@@ -84,7 +84,7 @@ void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
   if (!found) {
     ComputerInfo *new_computer = new ComputerInfo(ttime, timestamp, address);
     computers.push_back(new_computer);
-    //save_active(computers, active, *this);
+    save_active(computers, Configurator::instance()->active, *this);
   }
 
   if (ttime > (last_inactive + Configurator::instance()->timeLimit / 4)) {
@@ -96,7 +96,7 @@ void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
       }
     }
 
-    //save_active(computers, active, *this);
+    save_active(computers, Configurator::instance()->active, *this);
     last_inactive = ttime;
   }
 }
@@ -114,30 +114,27 @@ TimeSegmentList * ComputerInfoList::getSkew(std::string ip)
     {
         if( (*it)->address == ip )
         {
-            return &((*it)->timeSkewList);
+            return &((*it)->timeSegmentList);
         }
     }
     return NULL;
 }
 
 
-void ComputerInfoList::update_skew(const std::string &ip, const TimeSegmentList &s)
-{
+void ComputerInfoList::update_skew(const std::string &ip, const TimeSegmentList &s) {
   identity_container old_identities = get_similar_identities(ip);
 
   // Update database, be it a new address or an update
   TimeSegmentList * target_skew = getSkew(ip);
-  
+  //
   if(target_skew == NULL) 
   {
       std::cerr << "Pseudo-exception: entry should be present in computer list, but is not. Ip=" << ip << std::endl;
       exit(1);
   }
-  
+  //
   *(getSkew(ip)) = s;
   
-  // TODO: check whether there always is a computer with given IP
-
   // Notify observers
   identity_container new_identities = get_similar_identities(ip);
   construct_notify(ip, new_identities, s);
@@ -154,8 +151,6 @@ void ComputerInfoList::update_skew(const std::string &ip, const TimeSegmentList 
     }
   }
 }
-
-
 
 const identity_container ComputerInfoList::get_similar_identities(const std::string &ip)
 {
@@ -178,7 +173,7 @@ const identity_container ComputerInfoList::get_similar_identities(const std::str
             continue;
         }
         
-        if (reference_skew->is_similar_with((*it)->timeSkewList, Configurator::instance()->threshold)) {
+        if (reference_skew->is_similar_with((*it)->timeSegmentList, Configurator::instance()->threshold)) {
         identities.insert((*it)->address);
     }
   }

@@ -58,19 +58,15 @@ class ComputerInfo {
     double startTime;
 
     /// Skew information about one computer
-    std::list<PacketSegment> packetSkewList;
+    std::list<PacketSegment> packetSegmentList;
 
   // Constructors
   public:
     ComputerInfo(double first_packet_delivered, uint32_t first_packet_timstamp,
         const char* its_address);
 
-  // Destructor
-  public:
     ~ComputerInfo() {}
 
-  // Getters
-  public:
     const std::string& get_address() const
     {
       return address;
@@ -104,56 +100,52 @@ class ComputerInfo {
       return packets.rbegin()->Timestamp;
     }
 
-    const PacketSegment& get_skew() const
+    // TODO: why not confirmedSkew.Alpha or last TimeSegment from TimeSegmentList ?
+    const PacketSegment& get_last_packet_segment() const
     {
-      return *(packetSkewList.rbegin());
+      return *(packetSegmentList.rbegin());
     }
     
-    TimeSegmentList timeSkewList;
-
-  // Functions manipulating the state
-  public:
+    TimeSegmentList timeSegmentList;
     //
-    TimeSegmentList LastCalculatedSkew;
+    TimeSegmentList NewTimeSegmentList;
       
     /**
      * Adds a new packet without updating or recomputing anything
-     * @param[in] packet_delivered Arrival time of the new packet
-     * @param[in] timestamp TCP timestamp of the new packet
-     * @param[inout] skews Storage of clock skews of known devices
-     */
-    void insert_packet2(double packet_delivered, uint32_t timestamp);
-
-    /**
-     * Adds a new packet and possibly recomputes related informations
-     * @param[in] packet_delivered Arrival time of the new packet
-     * @param[in] timestamp TCP timestamp of the new packet
-     * @param[inout] skews Storage of clock skews of known devices
+     * @param[in] packet_delivered       Arrival time of the new packet
+     * @param[in] timestamp              TCP timestamp of the new packet
      */
     void insert_packet(double packet_delivered, uint32_t timestamp);
 
     /**
+     * Recomputes related informations
+     * @param[in] packet_delivered      Arrival time of the new packet
+     */
+    void check_block_finish(double packet_delivered);
+
+    /**
      * Restart measurement
-     * @param[in] packet_delivered Arrival time of the first packet
-     * @param[in] timestamp TCP timestamp of the first packet
+     * @param[in] packet_delivered      Arrival time of the first packet
+     * @param[in] timestamp             TCP timestamp of the first packet
      */
     void restart(double packet_delivered, uint32_t timestamp);
+    
     /// Reduces unnecessary information about packets
     void reduce_packets(packet_iterator start, packet_iterator end);
 
   private:
-    ///Performs actions after a block of packets is captured
-    void block_finished(double packet_delivered);
+    /// Performs actions after a block of packets is captured
+    void recompute_block(double packet_delivered);
     /// Adds initialized empty skew information
-    void add_empty_skew(packetTimeInfoList::iterator start);
+    void add_empty_packet_segment(packetTimeInfoList::iterator start);
     /// Computes a new skew
     ClockSkewPair compute_skew(const packet_iterator &start, const packet_iterator &end);
     /// Computes a new frequency
     int compute_freq();
     /** 
      * Save packets into file (called 'IP address.log')
-     * @param[in] rewrite Boolean that conrols if the file is overwritten or the packets are appended
-     * @return 0 if ok
+     * @param[in] rewrite   Boolean that conrols if the file is overwritten or the packets are appended
+     * @return 0            if ok
      * */
     int save_packets(short int rewrite);
 

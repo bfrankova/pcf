@@ -50,6 +50,8 @@ pcap_t *handle;
 // IPv6 addr length (39B) + '\0' + some padding
 #define ADDRESS_SIZE 64
 
+ComputerInfoList * computersTcp;
+
 
 void StopCapturing(int signum){
   pcap_breakloop(handle);
@@ -150,8 +152,8 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
       arrival_time = header->ts.tv_sec + (header->ts.tv_usec / 1000000.0);
 
       /// Save packet
-      ComputerInfoList *computers = reinterpret_cast<ComputerInfoList*>(args);
-      computers->new_packet(address, arrival_time, timestamp);
+      //ComputerInfoList *computers = reinterpret_cast<ComputerInfoList*>(args);
+      computersTcp->new_packet(address, arrival_time, timestamp);
       return; // Packet processed
     }
 
@@ -290,9 +292,10 @@ int StartCapturing() {
     alarm(Configurator::instance()->time);
   }
 
-  ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
+  computersTcp = new ComputerInfoList(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
+  // ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
   gnuplot_graph graph_creator;
-  computers.AddObserver(&graph_creator);
+  computersTcp->AddObserver(&graph_creator);
 
   /// Set interrupt signal (ctrl-c or SIGTERM during capturing means stop capturing)
   struct sigaction sigact;
@@ -322,7 +325,7 @@ int StartCapturing() {
   std::cout << "Capturing started at: " << ctime(&rawtime) << std::endl;
   
   /// Start capturing TODO
-  if (pcap_loop(handle, Configurator::instance()->number, GotPacket, reinterpret_cast<u_char*>(&computers)) == -1) {
+  if (pcap_loop(handle, Configurator::instance()->number, GotPacket, NULL) == -1) {
     std::cerr << "An error occured during capturing: " << pcap_geterr(handle) << std::endl;
     return(2);
   }

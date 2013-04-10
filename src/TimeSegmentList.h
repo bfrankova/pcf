@@ -46,8 +46,6 @@ class TimeSegmentList
   public:
     TimeSegmentList(): atoms(), endTime(0.0) {}
 
-  // Public methods
-  public:
     /// Adds new atom
     void add_atom(const TimeSegment &atom)
     {

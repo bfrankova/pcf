@@ -24,6 +24,21 @@
 #include "ComputerInfoList.h"
 
 /**
+ * Make the main structure of the document
+ * @param[in] filename Filename
+ * @return 0 if ok
+ */
+int first_computer(const char *filename);
+
+/**
+ * Conversts time to its string representation in human readable format
+ * @param[out] buffer       Pre-allocated buffer where the output is stored
+ * @param[in] buffer_size   Size of the buffer
+ * @param[in] time          Unix time to be converted
+ */
+void time_to_str(char *buffer, size_t buffer_size, time_t time);
+
+/**
  * Search for computers with similar skew in saved computers
  * @param[in] referenced_skew Skew to be searched
  * @param[inout] identities Container with identities of the computer that is being searched for
