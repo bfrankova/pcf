@@ -43,9 +43,9 @@ void print_help()
  */
 void process_log_file(std::ifstream &ifs)
 {
-  ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->time_limit, Configurator::instance()->threshold);
+  ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
   gnuplot_graph graph_creator;
-  computers.add_observer(&graph_creator);
+  computers.AddObserver(&graph_creator);
 
   double ttime, offset;
 
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
   // Get config
   char filename[] = "config";
-  Configurator::instance()->get_config(filename);
+  Configurator::instance()->GetConfig(filename);
 
   // Open log file
   std::ifstream ifs (argv[1], std::ifstream::in);

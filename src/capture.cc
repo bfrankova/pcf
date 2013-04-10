@@ -25,6 +25,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <iostream>
+#include <string>
 
 #include <pcap.h>
 #include <arpa/inet.h>
@@ -37,6 +38,8 @@
 #include "ComputerInfoList.h"
 #include "gnuplot_graph.h"
 #include "Configurator.h"
+#include "Debug.h"
+#include "Tools.h"
 
 /// Capture all packets on the wire
 #define PROMISC 1
@@ -48,37 +51,11 @@ pcap_t *handle;
 #define ADDRESS_SIZE 64
 
 
-void stop_capturing(int signum)
-{
+void StopCapturing(int signum){
   pcap_breakloop(handle);
 }
 
-
-double get_time()
-{
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  double result = tv.tv_sec + (tv.tv_usec / 1000000.0);
-  
-  return result;
-}
-
-
-int add_to_filter(char *filter, const char *add, int *length)
-{
-  char *tmp = (char*)realloc(filter, strlen(filter) + strlen(add) + sizeof(char));
-  if (tmp == NULL)
-    return(1);
-  
-  filter = tmp;
-  strncat(filter, add, strlen(add));
-  *length += strlen(add);
-  
-  return(0);
-}
-
-void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
-{
+void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *packet){
   // Allocate space for an address
   char address[ADDRESS_SIZE];
   // Ethernet header
@@ -99,8 +76,8 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
   size_ethernet = sizeof(struct ether_header);
   u_int16_t ether_type = ntohs(ether->ether_type);
   
-  if (ether_type == 0x0800)
-  { /// IPv4
+  /// IPv4
+  if (ether_type == 0x0800) { 
     // IP header
     const struct ip *ip  = (struct ip*)(packet + size_ethernet);
     size_ip = sizeof(struct ip);
@@ -116,8 +93,8 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
       return;
     }
   }
-  else if (ether_type == 0x86dd)
-  { /// IPv6
+  /// IPv6
+  else if (ether_type == 0x86dd) { 
     // IP header
     const struct ip6_hdr *ip  = (struct ip6_hdr*)(packet + size_ethernet);
     size_ip = sizeof(struct ip6_hdr);
@@ -138,19 +115,18 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
       fprintf(stderr, "Unknown Ethernet type\n");
       return;
   }
+  // skip TCP headers
   size_tcp = tcp->doff*4;
   if (size_tcp < 20) {
-#ifdef DEBUG
-    fprintf(stderr, "Invalid TCP header length: %u bytes\n", size_tcp);
-#endif
+    if(debug)
+      std::cerr << "Invalid TCP header length: " << size_tcp << " bytes" << std::endl;
     return;
   }
   
   // For sure, should filter pcap
   if (size_tcp == 20) {
-#ifdef DEBUG
-    printf("TCP header without options\n");
-#endif
+    if(debug)
+      std::cout << "TCP header without options" << std::endl;
     return;
   }
   /// TCP options
@@ -180,19 +156,15 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
     }
 
     switch(kind) {
-
       /// EOL
       case 0:
-#ifdef DEBUG
-        printf("TCP header option without timestamp\n");
-#endif
+        if(debug)
+          std::cout << "TCP header option without timestamp" << std::endl;
         return;
-
       /// NOP
       case 1:
         options_offset++;
         break;
-
       default:
         option_len = (int)tcp_options[options_offset + 1];
         options_offset += option_len;
@@ -202,8 +174,7 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 }
 
 
-int capture()
-{
+int StartCapturing() {
   // Dot notation network address
   char *net;
   // Dot notation network mask
@@ -213,17 +184,13 @@ int capture()
   // Compiled filter expr.
   struct bpf_program fp;
   // Filter expr.
-  char *filter = NULL;
+  std::string filter;
   // Netmask of sniffing device
   bpf_u_int32 maskp;
   // IP or sniffing device
   bpf_u_int32 netp;
   // Addresses
-  struct in_addr addr;
-  
-  
-  printf("capture(): start\n");
-
+  struct in_addr addr;  
   
   /// Set the device
   char *dev = Configurator::instance()->dev;
@@ -235,155 +202,128 @@ int capture()
     }
   }
   
-#ifdef DEBUG
-  /// Print selected device
-  printf("DEV: %s\n", dev);
-#endif
+  if(debug)
+      std::cout << "DEV: " << dev << std::endl;
   
   /// Find address and netmask for the device
   if (pcap_lookupnet(dev, &netp, &maskp, errbuf) == 0) {
     addr.s_addr = netp;
     net = inet_ntoa(addr);
     if (net == NULL)
-      fprintf(stderr, "Can't convert net address\n");
-#ifdef DEBUG
-    else
-      printf("NET: %s\n", net);
-#endif
+        std::cerr << "Can't convert net address" << std::endl;
+    else {
+        if(debug)
+            std::cout << "NET: " << net << std::endl;
+    }
   
     /// Netmask
     addr.s_addr = maskp;
     mask = inet_ntoa(addr);
     if (mask == NULL)
-      fprintf(stderr, "Can't convert net mask\n");
-#ifdef DEBUG
-    else
-      printf("MASK: %s\n\n", mask);
-#endif
+        std::cerr << "Can't convert net mask" << std::endl;
+    else {
+        if(debug)
+            std::cout << "MASK: " << mask << std::endl;
+    }
   }
   else
-    fprintf(stderr, "(Can't get netmask for device: %s)\n\n", dev);
+    std::cerr << "(Can't get netmask for device: " <<  dev << std::endl;
   
   /// Open the device for sniffing
   handle = pcap_open_live(dev, BUFSIZ, PROMISC, 1000, errbuf);
   if (handle == NULL) {
-    fprintf(stderr, "Couldn't open device %s: %s\n", dev, errbuf);
+    std::cerr << "Couldn't open device" <<  dev << ": " << errbuf << std::endl;
     return(2);
   }
   
-  printf("capture(): pre-filter compilation 1\n");
-  
-  /// Compile the filter
-  char tmp[10];
-  int length = 0;
-  
   // TCP
-  filter = (char*)realloc(filter, strlen("tcp"));
-  strcpy(filter, "tcp");
-  length += strlen("tcp");
+  filter = "tcp";
   // TCP header with options and (very likely) with timestamps
-  add_to_filter(filter, " && ((tcp[12] >= 120) || (ip6[52] >= 120)) ", &length);
+  filter += " && ((tcp[12] >= 120) || (ip6[52] >= 120)) ";
+ 
   // Port
   if (Configurator::instance()->port != 0) {
-    add_to_filter(filter, " && port ", &length);
-    sprintf(tmp, "%d", Configurator::instance()->port);
-    add_to_filter(filter, tmp, &length);
+    filter += " && port ";
+    filter += Tools::IntToString(Configurator::instance()->port);
   }
   // Src
   if (strcmp(Configurator::instance()->src, "") != 0) {
-    add_to_filter(filter, " && src host ", &length);
-    add_to_filter(filter, Configurator::instance()->src, &length);
+    filter += " && src ";
+    filter += Configurator::instance()->src;
   }
   // Dst
   if (strcmp(Configurator::instance()->dst, "") != 0) {
-    add_to_filter(filter, " && dst host ", &length);
-    add_to_filter(filter, Configurator::instance()->dst, &length);
+    filter += " && dst host ";
+    filter += Configurator::instance()->dst;
   }
   // SYN
   if (Configurator::instance()->syn == 1) {
-    add_to_filter(filter, " && tcp[tcpflags] & tcp-syn == tcp-syn ", &length);
+    filter += " && tcp[tcpflags] & tcp-syn == tcp-syn ";
   }
   // ACK	
   if (Configurator::instance()->ack == 1) {
-    add_to_filter(filter, " && tcp[tcpflags] & tcp-ack == tcp-ack ", &length);
+    filter += " && tcp[tcpflags] & tcp-ack == tcp-ack ";
   }
   // Filter
   if (strcmp(Configurator::instance()->filter, "") != 0) {
-    add_to_filter(filter, " && ", &length);
-    add_to_filter(filter, Configurator::instance()->filter, &length);
+      filter += " && ";
+      filter += Configurator::instance()->filter;
   }
-  filter[length] = '\0';
   
-#ifdef DEBUG
-  /// Print the filter
-  printf("Filter: %s\n", filter);
-#endif
+  if(debug)
+      std::cout << "Filter: " << filter << std::endl;
   
-  printf("capture(): pre-filter compilation 2\n");
-  
-  if (pcap_compile(handle, &fp, filter, 0, PCAP_NETMASK_UNKNOWN) == -1) {
-    fprintf(stderr, "Couldn't parse filter %s: %s\n", filter, pcap_geterr(handle));
+  if (pcap_compile(handle, &fp, filter.c_str(), 0, PCAP_NETMASK_UNKNOWN) == -1) {
+    std::cerr << "Couldn't parse filter " << filter << ": " << pcap_geterr(handle) << std::endl;
     return(2);
   }
-  
-  printf("capture(): pre-filter application\n");
   
   /// Apply the filter
   if (pcap_setfilter(handle, &fp) == -1) {
-    fprintf(stderr, "Couldn't install filter %s: %s\n", filter, pcap_geterr(handle));
+    std::cerr << "Couldn't install filter " << filter << ": " << pcap_geterr(handle) << std::endl;
     return(2);
   }
   
-  /// Free the filter
-  free(filter);
-  
   /// Set alarm (if any)
   if (Configurator::instance()->time > 0) {
-    signal(SIGALRM, stop_capturing);
+    signal(SIGALRM, StopCapturing);
     alarm(Configurator::instance()->time);
   }
-  
-  printf("capture(): initializing computer_info_list 1\n");
 
-  ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->time_limit, Configurator::instance()->threshold);
+  ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
   gnuplot_graph graph_creator;
-  
-  printf("capture(): initializing computer_info_list 2\n");
-  
-  computers.add_observer(&graph_creator);
-  
-  printf("capture(): initializing computer_info_list 3\n");
+  computers.AddObserver(&graph_creator);
 
   /// Set interrupt signal (ctrl-c or SIGTERM during capturing means stop capturing)
   struct sigaction sigact;
   memset(&sigact, 0, sizeof(sigact));
-  sigact.sa_handler = stop_capturing;
+  sigact.sa_handler = StopCapturing;
   sigemptyset(&sigact.sa_mask);
   sigact.sa_flags = SA_SIGINFO;
   if (sigaction(SIGINT, &sigact, NULL) != 0) {
-    fprintf(stderr, "Couldn't set SIGINT\n");
+    std::cerr << "Couldn't set SIGINT" << std::endl;
     return(2);
   }
   if (sigaction(SIGTERM, &sigact, NULL) != 0) {
-    fprintf(stderr, "Couldn't set SIGTERM\n");
+    std::cerr << "Couldn't set SIGTERM" << std::endl;
     return(2);
   }
   struct sigaction sigact2;
   memset(&sigact2, 0, sizeof(sigact2));
   sigact2.sa_handler = SIG_IGN;
   if (sigaction(SIGHUP, &sigact2, NULL) != 0) {
-    fprintf(stderr, "Couldn't set SIGHUP\n");
+    std::cerr << "Couldn't set SIGHUP" << std::endl;
     return(2);
   }
   
   /// Print actual time
   time_t rawtime;
   time(&rawtime);
-  printf("Capturing started at: %s\n", ctime(&rawtime));
+  std::cout << "Capturing started at: " << ctime(&rawtime) << std::endl;
   
-  /// Start capturing
-  if (pcap_loop(handle, Configurator::instance()->number, got_packet, reinterpret_cast<u_char*>(&computers)) == -1) {
-    fprintf(stderr, "An error occured during capturing: %s\n", pcap_geterr(handle));
+  /// Start capturing TODO
+  if (pcap_loop(handle, Configurator::instance()->number, GotPacket, reinterpret_cast<u_char*>(&computers)) == -1) {
+    std::cerr << "An error occured during capturing: " << pcap_geterr(handle) << std::endl;
     return(2);
   }
   

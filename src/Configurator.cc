@@ -40,7 +40,7 @@ Configurator * Configurator::instance() {
  * Fill the config structure with default data
  * @param[in] config Config structure
  */
-void Configurator::init()
+void Configurator::Init()
 {
   number = 0;
   time = 0;
@@ -55,7 +55,7 @@ void Configurator::init()
   strcpy(database, "www/data/database.xml");
   
   block = 100;
-  time_limit = 3600;
+  timeLimit = 3600;
   threshold = 0.001;
 }
 
@@ -117,7 +117,7 @@ int parse(const char *buf, char *name, char *value)
   return(0);
 }
 
-void Configurator::get_config(const char *filename)
+void Configurator::GetConfig(const char *filename)
 {
   FILE *f;
   f = fopen(filename, "r");
@@ -127,7 +127,7 @@ void Configurator::get_config(const char *filename)
   }
   
   /// Initialisation
-  init();
+  Init();
   
   /// Parse the file
   char buf[MAXLEN];
@@ -204,9 +204,9 @@ void Configurator::get_config(const char *filename)
       }
       // TIME_LIMIT
       else if (strcmp(name, "TIME_LIMIT") == 0) {
-        time_limit = atoi(value);
-        if (time_limit == 0)
-          time_limit = 3600;
+        timeLimit = atoi(value);
+        if (timeLimit == 0)
+          timeLimit = 3600;
       }
       // THRESHOLD
       else if (strcmp(name, "THRESHOLD") == 0) {

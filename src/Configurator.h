@@ -30,7 +30,7 @@ private:
     static Configurator * innerInstance;
     
 public:
-    Configurator() {};
+  Configurator() {};
     
   char dev[10];
   int number;
@@ -46,17 +46,17 @@ public:
   char database[1024];
   
   int block;
-  int time_limit;
+  int timeLimit;
   double threshold;
   
   
-  void init();
+  void Init();
 
   /**
    * Fill the config structure
    * @param[in] filename          Config file name
    */
-  void get_config(const char *filename);
+  void GetConfig(const char *filename);
   
   static Configurator * instance();
 };

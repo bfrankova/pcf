@@ -22,12 +22,12 @@
 
 #include "TimeSegment.h"
 #include "AnalysisInfo.h"
-#include "observer.h"
+#include "Observer.h"
 
-class gnuplot_graph: public observer<const AnalysisInfo>
+class gnuplot_graph: public Observer<const AnalysisInfo>
 {
   public:
-    virtual void notify(const AnalysisInfo& changed_skew);
+    virtual void Notify(const AnalysisInfo& changed_skew);
 
   private:
     void generate_graph(const AnalysisInfo& changed_skew);

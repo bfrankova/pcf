@@ -26,7 +26,9 @@
 #include "capture.h"
 #include "check_computers.h"
 #include "Configurator.h"
+#include "Debug.h"
 
+int debug = false;
 
 /**
  * Print banner
@@ -71,13 +73,16 @@ int main(int argc, char *argv[])
   
   /// Get config
   char filename[] = "config";
-  Configurator::instance()->get_config(filename);
+  Configurator::instance()->GetConfig(filename);
   
   /// Get params
   int c;
   opterr = 0;
-  while ((c = getopt(argc, argv, "hn:t:p:")) != -1) {
+  while ((c = getopt(argc, argv, "dhn:t:p:")) != -1) {
     switch(c) {
+      case 'd':
+        debug = true;
+        break;
       case 'h':
         print_help();
         return(0);
@@ -111,10 +116,8 @@ int main(int argc, char *argv[])
     }
   }
   
-  printf("main\n");
-  
   /// Get packets
-  if (capture() != 0)
+  if (StartCapturing() != 0)
     return(2);
   
   return(0);

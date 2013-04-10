@@ -13,29 +13,34 @@
         </df>
       </df>
       <in>AnalysisInfo.h</in>
+      <in>ClockSkewPair.h</in>
+      <in>Computations.cc</in>
+      <in>Computations.h</in>
       <in>ComputerInfo.cc</in>
       <in>ComputerInfo.h</in>
       <in>ComputerInfoList.cc</in>
       <in>ComputerInfoList.h</in>
       <in>Configurator.cc</in>
       <in>Configurator.h</in>
+      <in>Debug.h</in>
+      <in>Observable.h</in>
+      <in>Observer.h</in>
       <in>PacketSegment.h</in>
       <in>PacketTimeInfo.h</in>
+      <in>Point.h</in>
       <in>TimeSegment.h</in>
       <in>TimeSegmentList.cc</in>
       <in>TimeSegmentList.h</in>
+      <in>Tools.cc</in>
+      <in>Tools.h</in>
       <in>capture.cc</in>
       <in>capture.h</in>
       <in>check_computers.cc</in>
       <in>check_computers.h</in>
-      <in>computations.cc</in>
-      <in>computations.h</in>
       <in>gnuplot_graph.cc</in>
       <in>gnuplot_graph.h</in>
       <in>log_reader.cc</in>
       <in>main.cc</in>
-      <in>observer.h</in>
-      <in>point2d.h</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

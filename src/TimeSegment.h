@@ -17,8 +17,8 @@
  * along with pcf. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CLOCK_SKEW_H
-#define _CLOCK_SKEW_H
+#ifndef _TIME_SEGMENT_H
+#define _TIME_SEGMENT_H
 
 #include <limits>
 #include <set>
@@ -27,22 +27,22 @@
 /**
  * Clock skew y = alpha*x + beta, valid in certain time
  */
-struct TimeSegment
-{
+class TimeSegment {
+public:
   double alpha;
   double beta;
   /// Validity
-  double start_time;
-  double end_time;
-  double relative_start_time;
-  double relative_end_time;
+  double startTime;
+  double endTime;
+  double relativeStartTime;
+  double relativeEndTime;
 
   bool operator==(const TimeSegment &other) const
   {
     return alpha == other.alpha &&
       beta == other.beta &&
-      start_time == other.start_time &&
-      end_time == other.end_time;
+      startTime == other.startTime &&
+      endTime == other.endTime;
   }
 
   bool operator!=(const TimeSegment &other) const

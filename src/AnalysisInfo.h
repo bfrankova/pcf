@@ -32,8 +32,8 @@
  */
 class AnalysisInfo {
 public:
-  const std::string& address;
-  identity_container similar_identities;
-  const TimeSegmentList clock_skew;
+  const std::string& Address;
+  identity_container SimilarIdentities;
+  const TimeSegmentList ClockSkewList;
 };
 #endif

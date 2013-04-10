@@ -26,8 +26,9 @@
 
 #include "TimeSegment.h"
 #include "PacketTimeInfo.h"
-#include "PacketSegment.h"
 #include "TimeSegmentList.h"
+#include "ClockSkewPair.h"
+#include "PacketSegment.h"
 
 
 
@@ -38,43 +39,31 @@ class ComputerInfo {
 
   // Private types
   private:
-    /// Clock skew pair (alpha, beta): y = alpha*x + beta
-    typedef std::pair<double, double> clock_skew_pair;
-
-  // Attributes
-  private:
-
     /// List of time informations about packets
-    packet_time_info_list packets;
+    packetTimeInfoList packets;
 
     /// Frequency of the computer
     int freq;
 
     /// Time of the last added packet
-    double last_packet_time;
+    double lastPacketTime;
 
     /// Time of the packet with last confirmed skew
-    double last_confirmed_skew_packet_time;
+    double lastConfirmedPacketTime;
 
     /// Last confirmed skew
-    clock_skew_pair confirmed_skew;
+    ClockSkewPair confirmedSkew;
 
     /// Time of the start of the capture
-    double start_time;
+    double startTime;
 
     /// Skew information about one computer
-    std::list<PacketSegment> skew_list;
-
-    /**
-     * Number of packets in one block
-     * Some operations are performed only for each block or every nth block
-     */
-    const int block_size;
+    std::list<PacketSegment> packetSkewList;
 
   // Constructors
   public:
     ComputerInfo(double first_packet_delivered, uint32_t first_packet_timstamp,
-        const char* its_address, const int its_block_size);
+        const char* its_address);
 
   // Destructor
   public:
@@ -102,30 +91,30 @@ class ComputerInfo {
 
     double get_last_packet_time() const
     {
-      return last_packet_time;
+      return lastPacketTime;
     }
 
     double get_start_time() const
     {
-      return start_time;
+      return startTime;
     }
 
     uint32_t get_last_packet_timestamp() const
     {
-      return packets.rbegin()->timestamp;
+      return packets.rbegin()->Timestamp;
     }
 
     const PacketSegment& get_skew() const
     {
-      return *(skew_list.rbegin());
+      return *(packetSkewList.rbegin());
     }
     
-    TimeSegmentList known_skew;
+    TimeSegmentList timeSkewList;
 
   // Functions manipulating the state
   public:
     //
-    TimeSegmentList last_calculated_skew;
+    TimeSegmentList LastCalculatedSkew;
       
     /**
      * Adds a new packet without updating or recomputing anything
@@ -156,9 +145,9 @@ class ComputerInfo {
     ///Performs actions after a block of packets is captured
     void block_finished(double packet_delivered);
     /// Adds initialized empty skew information
-    void add_empty_skew(packet_time_info_list::iterator start);
+    void add_empty_skew(packetTimeInfoList::iterator start);
     /// Computes a new skew
-    clock_skew_pair compute_skew(const packet_iterator &start, const packet_iterator &end);
+    ClockSkewPair compute_skew(const packet_iterator &start, const packet_iterator &end);
     /// Computes a new frequency
     int compute_freq();
     /** 

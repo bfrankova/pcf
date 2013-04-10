@@ -20,14 +20,16 @@
 #ifndef _COMPUTER_INFO_LIST_H
 #define _COMPUTER_INFO_LIST_H
 
-#include "ComputerInfo.h"
 #include "AnalysisInfo.h"
-#include "observer.h"
+#include "Observer.h"
+#include "Observable.h"
+#include "ComputerInfoList.h"
+#include "ComputerInfo.h"
 
 /**
  * All informations known about a set of computers.
  */
-class ComputerInfoList : public observable<const AnalysisInfo> {
+class ComputerInfoList : public Observable<const AnalysisInfo> {
   // Attributes
   private:
     /// Informations about packet timing
@@ -36,27 +38,6 @@ class ComputerInfoList : public observable<const AnalysisInfo> {
     // clock_skew_guard skews;
     /// Last time when inactive computers were detected
     double last_inactive;
-
-    /// Filename of DB with saved computers
-    const char *saved_computers;
-
-    // Program configuration
-    // Filenames of databases
-    //char *active;
-
-    /// Number of packets in one block
-    const int block;
-    /**
-     * Number of seconds of inactivity afeter which old data are erased
-     * and the tracking is restarted
-     */
-    const int TIME_LIMIT;
-    
-    /**
-     * Number of PPM that controls if more addresses are treated as if they
-     * belong to the same computer.
-     */
-    const double THRESHOLD;
     
     void construct_notify(const std::string &ip, const identity_container &identitites, const TimeSegmentList &s) const;
     
@@ -65,7 +46,7 @@ class ComputerInfoList : public observable<const AnalysisInfo> {
   // Constructors
   public:
     ComputerInfoList(char *_active, char *saved_computers_db, int _block, int _time_limit, double _threshold):
-      last_inactive(time(NULL)),  block(_block), TIME_LIMIT(_time_limit), THRESHOLD(_threshold)
+      last_inactive(time(NULL))
     {}
 
   // Destructor
@@ -105,11 +86,6 @@ class ComputerInfoList : public observable<const AnalysisInfo> {
      * @param[in] ip The IP whose clock skew will be compared
      */
     const identity_container get_similar_identities(const std::string &ip);
-
-    /// Returns THRESHOLD
-    double get_threshold() {
-      return THRESHOLD;
-    }
 
 };
 

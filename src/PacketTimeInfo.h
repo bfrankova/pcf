@@ -23,7 +23,7 @@
 #include <list>
 #include <stdint.h>
 
-#include "point2d.h"
+#include "Point.h"
 
 
 /**
@@ -31,15 +31,12 @@
  */
 class PacketTimeInfo {
   public:
-    double time;
-    uint32_t timestamp;
-    point2d offset;
+    double ArrivalTime;
+    uint32_t Timestamp;
+    Point Offset;
 };
 
-/**
- * Typedef for a list of all packets known for one computer.
- */
-typedef std::list<PacketTimeInfo> packet_time_info_list;
-typedef packet_time_info_list::iterator packet_iterator;
+typedef std::list<PacketTimeInfo> packetTimeInfoList;
+typedef packetTimeInfoList::iterator packet_iterator;
 
 #endif

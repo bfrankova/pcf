@@ -20,41 +20,28 @@
 #ifndef _CAPTURE_H
 #define _CAPTURE_H
 
-
-/**
- * Capture packets
- * @param[in] config Config data
- * @return 0 if ok
- */
-int capture();
-
-/**
- * Signal handler to stop capturing
- */
-void stop_capturing(int signum);
-
-/**
- * Get Actual time
- * @return Actual time in seconds
- */
-//double get_time();
-
-/** 
- * Callback function for pcap
- * @param[in] args User params
- * @param[in] header Packet header
- * @param[in] packet Packet
- */
-void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
-
-/**
- * Making filter string
- * @param[in,out] filter String with filter
- * @param[in] add String to add
- * @param[in,out] length Filter string length
- * @return 0 if ok
- */
-int add_to_filter(char *filter, const char *add, int *length);
+#include <arpa/inet.h>
+#include <pcap.h>
+#include <string>
 
 
+    /**
+     * Capture packets
+     * @param[in] config   Config data
+     * @return 0           if ok
+     */
+     int StartCapturing();
+
+    /**
+     * Signal handler to stop capturing
+     */
+     void StopCapturing(int signum);
+
+    /** 
+     * Callback function for pcap
+     * @param[in] args     User params
+     * @param[in] header   Packet header
+     * @param[in] packet   Packet
+     */
+     void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
 #endif
