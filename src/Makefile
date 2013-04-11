@@ -20,7 +20,7 @@
 program = pcf
 
 OBJ = capture.o main.o ComputerInfoList.o Configurator.o Computations.o check_computers.o ComputerInfo.o gnuplot_graph.o TimeSegmentList.o Tools.o
-#LOG_READER_OBJ = log_reader.o ComputerInfoList.o Configurator.o computations.o check_computers.o ComputerInfo.o gnuplot_graph.o TimeSegmentList.o
+LOG_READER_OBJ = log_reader.o ComputerInfoList.o Configurator.o computations.o check_computers.o ComputerInfo.o gnuplot_graph.o TimeSegmentList.o
 HEAD = capture.h ComputerInfoList.h ClockSkewPair.h Configurator.h Computations.h check_computers.h ComputerInfo.h PacketTimeInfo.h Point.h Observer.h Observable.h TimeSegment.h AnalysisInfo.h gnuplot_graph.h TimeSegmentList.h Debug.h Tools.h
 OPT = -lpcap -lm `xml2-config --cflags --libs`
 CC = g++
@@ -31,7 +31,7 @@ LD = g++
 
 .PHONY: debug profiling uninstall clean donotreduce
 
-all: $(program) log_reader
+all: $(program)
 
 debug:
 	make clean
