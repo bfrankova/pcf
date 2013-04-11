@@ -17,32 +17,32 @@
  * along with pcf. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _GNUPLOT_GRAPH_H
-#define _GNUPLOT_GRAPH_H
+#ifndef _OBSERVER_H
+#define _OBSERVER_H
 
-#include "TimeSegment.h"
-#include "AnalysisInfo.h"
-#include "Observer.h"
-#include <string>
+// This file specifies classes related to implemented observer design pattern
 
-class gnuplot_graph: public Observer<const AnalysisInfo>
+#include <list>
+
+/**
+ * Abstract base class for an observer.
+ *
+ * Observer registers to an observable and is later informed that a subject
+ * has changed via the notify method.
+ */
+template <class subject>
+class Observer
 {
-  private:
-    std::string type;
-    void generate_graph(const AnalysisInfo& changed_skew);
-  
-    public:
-    gnuplot_graph(std::string type){
-        this->type = type;
-    };
-    virtual void Notify(const AnalysisInfo& changed_skew);
-    std::string getOutputDirectory(){
-        if(type == "tcp")
-            return "";
-        return type + "/";
-    }
-    
+  // Constructors and destructors
+  protected:
+    Observer() {}
+  public:
+    virtual ~Observer() {}
 
+  // Public methods
+  public:
+    virtual void Notify(subject& changed_subject) = 0;
 };
+
 
 #endif

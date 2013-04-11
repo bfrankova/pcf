@@ -51,6 +51,7 @@ pcap_t *handle;
 #define ADDRESS_SIZE 64
 
 ComputerInfoList * computersTcp;
+ComputerInfoList * computersIcmp;
 
 
 void StopCapturing(int signum){
@@ -292,10 +293,13 @@ int StartCapturing() {
     alarm(Configurator::instance()->time);
   }
 
-  computersTcp = new ComputerInfoList(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
+  computersTcp = new ComputerInfoList("tcp");
+  computersIcmp = new ComputerInfoList("icmp");
   // ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
-  gnuplot_graph graph_creator;
-  computersTcp->AddObserver(&graph_creator);
+  gnuplot_graph graph_creator_tcp("tcp");
+  gnuplot_graph graph_creator_icmp("icmp");
+  computersTcp->AddObserver(&graph_creator_tcp);
+  computersIcmp->AddObserver(&graph_creator_icmp);
 
   /// Set interrupt signal (ctrl-c or SIGTERM during capturing means stop capturing)
   struct sigaction sigact;
@@ -332,6 +336,5 @@ int StartCapturing() {
   
   /// Close the session
   pcap_close(handle);
-  
   return(0);
 }

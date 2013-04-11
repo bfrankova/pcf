@@ -23,6 +23,7 @@
 #include <cstring>
 #include <list>
 
+#include "ComputerInfoList.h"
 #include "TimeSegment.h"
 #include "Computations.h"
 #include "PacketTimeInfo.h"
@@ -35,13 +36,14 @@ const size_t STRLEN_MAX = 100;
 
 const double SKEW_VALID_AFTER = 5*60;
 
-ComputerInfo::ComputerInfo(double first_packet_delivered, uint32_t first_packet_timstamp,
+ComputerInfo::ComputerInfo(void * parentList, double first_packet_delivered, uint32_t first_packet_timstamp,
     const char* its_address):
   packets(), freq(0),
   lastPacketTime(first_packet_delivered), lastConfirmedPacketTime(first_packet_delivered),
   confirmedSkew(UNDEFINED_SKEW, UNDEFINED_SKEW),
   startTime(first_packet_delivered), packetSegmentList(), address(its_address)
 {
+  this->parentList = parentList;
   insert_packet(first_packet_delivered, first_packet_timstamp);
   add_empty_packet_segment(packets.begin());
 }
@@ -423,11 +425,9 @@ int ComputerInfo::save_packets(short rewrite)
 {
   FILE *f;
   char filename[50] = "log/";
+  std::strcat(filename, static_cast<ComputerInfoList *>(parentList)->getOutputDirectory().c_str());
   std::strcat(filename, get_address().c_str());
   std::strcat(filename, ".log");
-#ifdef DEBUG
-  int lines = 0;
-#endif
   
   /// Open file
   if (rewrite == 1)

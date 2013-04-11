@@ -20,6 +20,7 @@
 #include <cstring>
 #include <ctime>
 #include <string>
+#include <iostream>
 
 #include "TimeSegment.h"
 #include "gnuplot_graph.h"
@@ -46,7 +47,10 @@ void gnuplot_graph::generate_graph(const AnalysisInfo &changed_skew)
   const std::string& address = changed_skew.Address;
   const TimeSegmentList& computer_skew = changed_skew.ClockSkewList;
 
-  static const char* filename_template =  "graph/%s.gp";
+  // get output directory according to type
+  std::string extendedFilenameTemplate = "graph/" + getOutputDirectory() + "%s.gp";
+  const char* filename_template = extendedFilenameTemplate.c_str();
+  
   FILE *f;
   int filename_max = strlen(filename_template) + address.length();
   char filename[filename_max + 1];
@@ -69,6 +73,7 @@ void gnuplot_graph::generate_graph(const AnalysisInfo &changed_skew)
   fputs("set encoding iso_8859_2\n"
         "set terminal svg\n"
         "set output 'www/graph/", f);
+        fputs(getOutputDirectory().c_str(), f);
         fputs(address.c_str(), f);
         fputs(".svg'\n\n"
         "set x2label 'Date and time'\n"
@@ -154,6 +159,7 @@ void gnuplot_graph::generate_graph(const AnalysisInfo &changed_skew)
   fputs("\n\n"
         "plot '", f);
   fputs("log/", f);
+  fputs(getOutputDirectory().c_str(), f);
   fputs(address.c_str(), f);
   fputs(".log' title ''", f);
 
@@ -183,10 +189,13 @@ void gnuplot_graph::generate_graph(const AnalysisInfo &changed_skew)
   if (fclose(f) != 0)
     fprintf(stderr, "Cannot close file: %s\n", filename);
   
-  static const char* gnuplot_template =  "gnuplot graph/%s.gp";
+  std::string extendedGnuplotTemplate = "gnuplot graph/" + getOutputDirectory() + "%s.gp";
+  const char* gnuplot_template =  extendedGnuplotTemplate.c_str();
   int gnuplot_max = strlen(gnuplot_template) + address.length();
   char gnuplot_cmd[gnuplot_max + 1];
   snprintf(gnuplot_cmd, gnuplot_max, gnuplot_template, address.c_str());
+  
+  //
   if(system(gnuplot_cmd) < 0)
       fprintf(stderr, "Error while launching gnuplot\n");
   

@@ -30,8 +30,6 @@
 #include "ClockSkewPair.h"
 #include "PacketSegment.h"
 
-
-
 /**
  * All informations known about each computer including time information about all received packets.
  */
@@ -59,10 +57,13 @@ class ComputerInfo {
 
     /// Skew information about one computer
     std::list<PacketSegment> packetSegmentList;
+    
+    // pointer to the parent list of computers that includes this one
+    void * parentList;
 
   // Constructors
   public:
-    ComputerInfo(double first_packet_delivered, uint32_t first_packet_timstamp,
+    ComputerInfo(void * parentList, double first_packet_delivered, uint32_t first_packet_timstamp,
         const char* its_address);
 
     ~ComputerInfo() {}

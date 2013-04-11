@@ -23,7 +23,6 @@
 #include "AnalysisInfo.h"
 #include "Observer.h"
 #include "Observable.h"
-#include "ComputerInfoList.h"
 #include "ComputerInfo.h"
 
 /**
@@ -38,6 +37,7 @@ class ComputerInfoList : public Observable<const AnalysisInfo> {
     // clock_skew_guard skews;
     /// Last time when inactive computers were detected
     double last_inactive;
+    std::string type;
     
     void construct_notify(const std::string &ip, const identity_container &identitites, const TimeSegmentList &s) const;
     
@@ -45,16 +45,17 @@ class ComputerInfoList : public Observable<const AnalysisInfo> {
 
   // Constructors
   public:
-    ComputerInfoList(char *_active, char *saved_computers_db, int _block, int _time_limit, double _threshold):
-      last_inactive(time(NULL))
+    ComputerInfoList(std::string type): last_inactive(time(NULL)), type(type)
     {}
-
-  // Destructor
-  public:
+    
     ~ComputerInfoList();
 
-  // Public methods
-  public:
+    std::string getOutputDirectory(){
+        if(type == "tcp")
+            return "";
+        return type + "/";
+    }
+    
     /**
      * New packet processing (classify, save, compute...)
      * @param[in] address IP address of the source

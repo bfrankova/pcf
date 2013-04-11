@@ -53,7 +53,7 @@ uninstall:
 	rm -f ../bin/pcf
 
 clean:
-	rm -f *.o *~ $(program)
+	rm -f *.o *~ $(program) log_reader
 
 $(program): $(OBJ)
 	$(LD) $(OBJ) $(LDFLAGS) -o $(program) $(OPT)
