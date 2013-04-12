@@ -213,7 +213,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
           return;
       // retrieve appropriate timestamp
       unsigned int * newTimestamp = (unsigned int *)icmp + 3;
-      timestamp = (uint32_t) *newTimestamp;
+      timestamp = (uint32_t) ntohl(*newTimestamp);
       std::cout << "recieved timestamp: " << timestamp << std::endl;
       arrival_time = header->ts.tv_sec + (header->ts.tv_usec / 1000000.0);
       // save packet 
