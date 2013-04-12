@@ -33,6 +33,7 @@
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
 #include <netinet/tcp.h>
+#include <netinet/ip_icmp.h>
 
 #include "capture.h"
 #include "ComputerInfoList.h"
@@ -64,11 +65,15 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
   // Ethernet header
   const struct ether_header *ether = (struct ether_header*) packet;
   // TCP header
-  const struct tcphdr *tcp;
+  const struct tcphdr *tcp = NULL;
+  // ICMP header
+  const struct icmphdr *icmp = NULL;
   // Packet arrival time (us)
   double arrival_time;
   // Timestamp
   uint32_t timestamp;
+  //
+  std::string type = "";
   
   // number of processed packets
   static int n_packets = 0;
@@ -87,16 +92,20 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
     // IP header
     const struct ip *ip  = (struct ip*)(packet + size_ethernet);
     size_ip = sizeof(struct ip);
-    // Check if the packet is TCP
+    // Check if the packet is ICMP or TCP
     if(ip->ip_p == IPPROTO_ICMP){
-      std::cout << "ICMP recieved, IP: " << address << std::endl;
-      return;
+      type = "icmp";
+      icmp = (struct icmphdr*)(packet + size_ethernet + size_ip);
+      std::cout << "ICMP recieved"<< std::endl;
     }
-    else if (ip->ip_p != IPPROTO_TCP)
+    else if (ip->ip_p == IPPROTO_TCP){
+      type = "tcp";
+      tcp = (struct tcphdr*)(packet + size_ethernet + size_ip);
+    }
+    else
       return;
-
-    /// TCP
-    tcp = (struct tcphdr*)(packet + size_ethernet + size_ip);
+    
+    // get IP address
     if (inet_ntop(AF_INET, &(ip->ip_src), address, 64) == NULL)
     {
       fprintf(stderr, "Cannot get IP address\n");
@@ -125,7 +134,9 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
       fprintf(stderr, "Unknown Ethernet type\n");
       return;
   }
-  // skip TCP headers
+  
+  if(type == "tcp"){
+    // skip TCP headers
   size_tcp = tcp->doff*4;
   if (size_tcp < 20) {
     if(debug)
@@ -156,7 +167,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
 
     if (kind == 8) {
       timestamp = ntohl(*((uint32_t*) (&tcp_options[options_offset + 2])));
-      /// Packet arrival time
+      /// Packet arrival timearrival_time
       arrival_time = header->ts.tv_sec + (header->ts.tv_usec / 1000000.0);
 
       /// Save packet
@@ -180,7 +191,33 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
         option_len = (int)tcp_options[options_offset + 1];
         options_offset += option_len;
         break;
-    }
+     }
+   }
+  }
+  else if(type == "icmp"){
+    // ICMP header
+    // +--------+--------+---------+--------+
+    // |  Type  |  Code  |  Header Chcksum  |
+    // +--------+--------+---------+--------+
+    // |    Identifier   |   Sequence Num   |
+    // +--------+--------+---------+--------+
+    // |        Originate Timestamp         |
+    // +--------+--------+---------+--------+
+    // |         Recieve Timestamp          |
+    // +--------+--------+---------+--------+
+    // |        Transmit Timestamp          |
+    // +--------+--------+---------+--------+
+      
+      // packet is not ICMP timestamp reply -> throw away
+      if(icmp->type != ICMP_TSTAMPREPLY)
+          return;
+      // retrieve appropriate timestamp
+      timestamp = ntohl(* (uint32_t *) icmp + sizeof(icmphdr) + 32);
+      arrival_time = header->ts.tv_sec + (header->ts.tv_usec / 1000000.0);
+      // save packet 
+      computersIcmp->new_packet(address, arrival_time, timestamp);
+      // packet processed
+      return;
   }
 }
 
