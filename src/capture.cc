@@ -70,6 +70,9 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
   // Timestamp
   uint32_t timestamp;
   
+  // number of processed packets
+  static int n_packets = 0;
+  
   // Sizes
   int size_ethernet;
   int size_ip;
@@ -84,8 +87,12 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
     // IP header
     const struct ip *ip  = (struct ip*)(packet + size_ethernet);
     size_ip = sizeof(struct ip);
-    /// Check if the packet is TCP
-    if (ip->ip_p != IPPROTO_TCP)
+    // Check if the packet is TCP
+    if(ip->ip_p == IPPROTO_ICMP){
+      std::cout << "ICMP recieved, IP: " << address << std::endl;
+      return;
+    }
+    else if (ip->ip_p != IPPROTO_TCP)
       return;
 
     /// TCP
@@ -154,10 +161,11 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
 
       /// Save packet
       //ComputerInfoList *computers = reinterpret_cast<ComputerInfoList*>(args);
+      n_packets++;
       computersTcp->new_packet(address, arrival_time, timestamp);
       return; // Packet processed
     }
-
+    
     switch(kind) {
       /// EOL
       case 0:
@@ -246,8 +254,7 @@ int StartCapturing() {
  
   // Port
   if (Configurator::instance()->port != 0) {
-    filter += " && port ";
-    filter += Tools::IntToString(Configurator::instance()->port);
+    filter += " && port "  + Tools::IntToString(Configurator::instance()->port);
   }
   // Src
   if (strcmp(Configurator::instance()->src, "") != 0) {
@@ -272,6 +279,8 @@ int StartCapturing() {
       filter += " && ";
       filter += Configurator::instance()->filter;
   }
+  
+  filter += "|| (icmp && icmp[icmptype] == icmp-tstampreply)";
   
   if(debug)
       std::cout << "Filter: " << filter << std::endl;
