@@ -82,7 +82,8 @@ void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
   }
 
   if (!found) {
-    ComputerInfo *new_computer = new ComputerInfo(this, ttime, timestamp, address);
+    ComputerInfo *new_computer = new ComputerInfo(this, address);
+    new_computer->insert_first_packet(ttime, timestamp);
     computers.push_back(new_computer);
     save_active(computers, Configurator::instance()->active, *this);
   }

@@ -34,6 +34,7 @@
 #include <netinet/ip6.h>
 #include <netinet/tcp.h>
 #include <netinet/ip_icmp.h>
+#include <pthread.h>
 
 #include "capture.h"
 #include "ComputerInfoList.h"
@@ -53,7 +54,6 @@ pcap_t *handle;
 
 ComputerInfoList * computersTcp;
 ComputerInfoList * computersIcmp;
-
 
 void StopCapturing(int signum){
   pcap_breakloop(handle);
@@ -287,7 +287,7 @@ int StartCapturing() {
   }
   
   // TCP
-  filter = "tcp";
+  filter = "(tcp";
   // TCP header with options and (very likely) with timestamps
   filter += " && ((tcp[12] >= 120) || (ip6[52] >= 120)) ";
  
@@ -319,7 +319,7 @@ int StartCapturing() {
       filter += Configurator::instance()->filter;
   }
   
-  filter += "|| (icmp && icmp[icmptype] == icmp-tstampreply)";
+  filter += ") || (icmp && icmp[icmptype] == icmp-tstampreply)";
   
   if(debug)
       std::cout << "Filter: " << filter << std::endl;
@@ -370,6 +370,7 @@ int StartCapturing() {
     std::cerr << "Couldn't set SIGHUP" << std::endl;
     return(2);
   }
+
   
   /// Print actual time
   time_t rawtime;

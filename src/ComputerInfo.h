@@ -63,8 +63,7 @@ class ComputerInfo {
 
   // Constructors
   public:
-    ComputerInfo(void * parentList, double first_packet_delivered, uint32_t first_packet_timstamp,
-        const char* its_address);
+    ComputerInfo(void * parentList, const char* its_address);
 
     ~ComputerInfo() {}
 
@@ -117,6 +116,8 @@ class ComputerInfo {
      * @param[in] timestamp              TCP timestamp of the new packet
      */
     void insert_packet(double packet_delivered, uint32_t timestamp);
+    
+    void insert_first_packet(double packet_delivered, uint32_t timestamp);
 
     /**
      * Recomputes related informations

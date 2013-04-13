@@ -20,6 +20,7 @@
 #ifndef _CONFIGURATOR_H
 #define _CONFIGURATOR_H
 
+#include <string>
 
 /**
  * Structure with all config data
@@ -44,6 +45,7 @@ public:
   
   char active[1024];
   char database[1024];
+  static const std::string xmlDir;
   
   int block;
   int timeLimit;

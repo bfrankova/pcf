@@ -32,6 +32,7 @@
 #include "check_computers.h"
 #include "ComputerInfo.h"
 #include "TimeSegment.h"
+#include "Configurator.h"
 
 
 #define MY_ENCODING "UTF-8"
@@ -133,15 +134,18 @@ int save_active(const std::list<ComputerInfo *> &all_computers, const char *acti
   xmlDocPtr doc;
   xmlNodePtr nodeptr = NULL, node = NULL, node_child = NULL;
 
+  std::string activeFilename = Configurator::xmlDir + computers.getOutputDirectory();
+  activeFilename.append(active);
+  
   /// File doesn't exist yet
-  if (first_computer(active) != 0) {
-    fprintf(stderr, "Cannot create XML file: %s\n", active);
+  if (first_computer(activeFilename.c_str()) != 0) {
+    fprintf(stderr, "Cannot create XML file: %s\n", activeFilename.c_str());
     return(1);
   }
     
-  doc = xmlParseFile(active);
+  doc = xmlParseFile(activeFilename.c_str());
   if (doc == NULL ) {
-    fprintf(stderr, "XML document not parsed successfully: %s\n", active);
+    fprintf(stderr, "XML document not parsed successfully: %s\n", activeFilename.c_str());
     return(1);
   }
   
@@ -153,7 +157,7 @@ int save_active(const std::list<ComputerInfo *> &all_computers, const char *acti
   
   /// Check root (<computers>)
   if (xmlStrcmp(nodeptr->name, (const xmlChar *) "computers")) {
-    fprintf(stderr, "XML document of the wrong type: %s\n", active);
+    fprintf(stderr, "XML document of the wrong type: %s\n", activeFilename.c_str());
     xmlFreeDoc(doc);
     return(1);
   }
@@ -209,10 +213,10 @@ int save_active(const std::list<ComputerInfo *> &all_computers, const char *acti
     xmlAddChild(nodeptr, node);
     
     /// Save
-    xmlSaveFileEnc(active, doc, MY_ENCODING);
+    xmlSaveFileEnc(activeFilename.c_str(), doc, MY_ENCODING);
 
 #ifdef DEBUG
-    fprintf(stderr, "XML: saved %s: frequency %d, skew %lf\n", (*it)->get_address().c_str(), (*it)->get_freq(), (*it)->get_skew().alpha);
+    fprintf(stderr, "XML: saved %s: frequency %d, skew %lf\n", (*it)->get_address().c_str(), (*it)->get_freq(), (*it)->get_last_packet_segment().alpha);
 #endif
   }
   

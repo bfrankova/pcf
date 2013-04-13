@@ -36,16 +36,19 @@ const size_t STRLEN_MAX = 100;
 
 const double SKEW_VALID_AFTER = 5*60;
 
-ComputerInfo::ComputerInfo(void * parentList, double first_packet_delivered, uint32_t first_packet_timstamp,
-    const char* its_address):
-  packets(), freq(0),
-  lastPacketTime(first_packet_delivered), lastConfirmedPacketTime(first_packet_delivered),
-  confirmedSkew(UNDEFINED_SKEW, UNDEFINED_SKEW),
-  startTime(first_packet_delivered), packetSegmentList(), address(its_address)
+ComputerInfo::ComputerInfo(void * parentList, const char* its_address):
+  packets(), freq(0), confirmedSkew(UNDEFINED_SKEW, UNDEFINED_SKEW), packetSegmentList(), address(its_address)
 {
   this->parentList = parentList;
-  insert_packet(first_packet_delivered, first_packet_timstamp);
-  add_empty_packet_segment(packets.begin());
+}
+
+void ComputerInfo::insert_first_packet(double packet_delivered, uint32_t timestamp){
+    lastPacketTime = packet_delivered;
+    lastConfirmedPacketTime = packet_delivered;
+    startTime = packet_delivered;
+    
+    insert_packet(packet_delivered, timestamp);
+    add_empty_packet_segment(packets.begin());
 }
 
 void ComputerInfo::insert_packet(double packet_delivered, uint32_t timestamp)
@@ -117,8 +120,8 @@ void ComputerInfo::recompute_block(double packet_delivered)
   }
 #ifdef DEBUG
   printf("%s: last skew (%g, %g), new skew (%g, %g), confirmed (%g, %g)\n",
-      address.c_str(), last_skew.alpha, last_skew.beta, new_skew.first,
-      new_skew.second, confirmedSkew.first, confirmedSkew.second);
+      address.c_str(), last_skew.alpha, last_skew.beta, new_skew.Alpha,
+      new_skew.Beta, confirmedSkew.Alpha, confirmedSkew.Beta);
 #endif
 
   last_skew.alpha = new_skew.Alpha;
@@ -137,7 +140,7 @@ void ComputerInfo::recompute_block(double packet_delivered)
       lastConfirmedPacketTime = packet_delivered;
 #ifdef DEBUG
       printf("%s: New skew confirmed (%g, %g), time %g\n", address.c_str(),
-          confirmedSkew.first, confirmedSkew.second, last_skew.last->Offset.x);
+          confirmedSkew.Alpha, confirmedSkew.Beta, last_skew.last->Offset.x);
 #endif
 
 #ifndef DONOTREDUCE
@@ -373,7 +376,7 @@ ClockSkewPair ComputerInfo::compute_skew(const packet_iterator &start, const pac
   }
   
 #ifdef DEBUG
-  printf("f(x) = %lfx + %lf, min = %lf\n", result.first, result.second, min);
+  printf("f(x) = %lfx + %lf, min = %lf\n", result.Alpha, result.Beta, min);
 #endif
   
   return result;
@@ -445,18 +448,10 @@ int ComputerInfo::save_packets(short rewrite)
   for (auto it = packets.begin(); it != packets.end(); ++it) {
     snprintf(str, STRLEN_MAX, "%lf\t%lf\n", it->Offset.x, it->Offset.y);
     fputs(str, f);
-#ifdef DEBUG
-    lines++;
-#endif
   }
   
   /// Close file
   if (fclose(f) != 0)
     fprintf(stderr, "Cannot close file: %s\n", filename);
-
-#ifdef DEBUG
-    fprintf(stderr, "%s: %d lines written", get_address().c_str(), lines);
-#endif
-  
   return(0);
 }

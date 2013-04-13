@@ -59,10 +59,10 @@ ack 0
 #########
 
 # Active computers
-active www/data/active.xml
+active active.xml
 
 # Saved computers
-database www/data/database.xml
+database database.xml
 
 
 ########################################
@@ -74,7 +74,7 @@ database www/data/database.xml
 THRESHOLD 0.001
 
 # Number of packets to do block operations
-BLOCK 50
+BLOCK 20
 
 # Time limit for removing old lists (seconds)
 TIME_LIMIT 3600

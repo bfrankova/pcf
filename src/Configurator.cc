@@ -26,6 +26,7 @@
 
 
 Configurator * Configurator::innerInstance = NULL;
+const std::string Configurator::xmlDir  = "www/data/";
 
 
 Configurator * Configurator::instance() {
@@ -51,8 +52,8 @@ void Configurator::Init()
   ack = 0;
   strcpy(filter, "");
   
-  strcpy(active, "www/data/active.xml");
-  strcpy(database, "www/data/database.xml");
+  strcpy(active, "active.xml");
+  strcpy(database, "database.xml");
   
   block = 100;
   timeLimit = 3600;
