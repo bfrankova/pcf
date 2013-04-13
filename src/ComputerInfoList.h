@@ -88,6 +88,7 @@ class ComputerInfoList : public Observable<const AnalysisInfo> {
      */
     const identity_container get_similar_identities(const std::string &ip);
 
+    void to_poke_or_not_to_poke(std::string address);
 };
 
 #endif

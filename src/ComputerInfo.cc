@@ -43,6 +43,7 @@ ComputerInfo::ComputerInfo(void * parentList, const char* its_address):
 }
 
 void ComputerInfo::insert_first_packet(double packet_delivered, uint32_t timestamp){
+    firstPacketReceived = true;
     lastPacketTime = packet_delivered;
     lastConfirmedPacketTime = packet_delivered;
     startTime = packet_delivered;

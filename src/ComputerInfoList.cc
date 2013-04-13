@@ -28,6 +28,17 @@
 
 ComputerInfoList::~ComputerInfoList() {}
 
+void ComputerInfoList::to_poke_or_not_to_poke(std::string address){
+  for (std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it) {
+    if ((*it)->get_address() == address)
+      return;
+  }
+  ComputerInfo *new_computer = new ComputerInfo(this, address.c_str());
+  // TODO: decouple new thread to poke the computer under given address (e.g., new_computer->start_poking())
+  computers.push_back(new_computer);
+  save_active(computers, Configurator::instance()->active, *this);
+}
+
 void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t timestamp)
 {
   static unsigned long total = 0;
@@ -43,7 +54,13 @@ void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
 
     // Computer already known
     ComputerInfo &known_computer = **it;
-
+    
+    // first received packet for this IP (ICMP)
+    if(!known_computer.firstPacketReceived){
+        known_computer.insert_first_packet(ttime, timestamp);
+        break;
+    }
+        
     /// Too much time since last packet so start from the beginning
     if ((ttime - known_computer.get_last_packet_time()) > Configurator::instance()->timeLimit) {
       known_computer.restart(ttime, timestamp);

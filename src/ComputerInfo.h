@@ -66,7 +66,9 @@ class ComputerInfo {
     ComputerInfo(void * parentList, const char* its_address);
 
     ~ComputerInfo() {}
-
+    
+    bool firstPacketReceived = false;
+    
     const std::string& get_address() const
     {
       return address;
