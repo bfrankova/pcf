@@ -61,9 +61,9 @@ class ComputerInfoList : public Observable<const AnalysisInfo> {
      * @param[in] address IP address of the source
      * @param[in] time Real time when packet arrived
      * @param[in] timestamp PCAP timestamp of the packet
-     * @return 0 if ok
+     * @return 0 if new IP address, 1 if computer already known
      */
-    void new_packet(const char *address, double time, uint32_t timestamp);
+    bool new_packet(const char *address, double time, uint32_t timestamp);
 
     /**
      * Registers a new observer for clock changes

@@ -24,22 +24,27 @@
 #include "ComputerInfoList.h"
 #include "check_computers.h"
 #include "Configurator.h"
+#include "ComputerInfoIcmp.h"
 
 
 ComputerInfoList::~ComputerInfoList() {}
 
 void ComputerInfoList::to_poke_or_not_to_poke(std::string address){
+  // try to find computer, return if already present and poking
   for (std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it) {
     if ((*it)->get_address() == address)
       return;
   }
-  ComputerInfo *new_computer = new ComputerInfo(this, address.c_str());
-  // TODO: decouple new thread to poke the computer under given address (e.g., new_computer->start_poking())
+  // computer was not found, add new to the list
+  ComputerInfoIcmp *new_computer = new ComputerInfoIcmp(this, address.c_str());
+  
+  // decouple new thread to poke the computer under given address
+  new_computer->StartPoking();
   computers.push_back(new_computer);
   save_active(computers, Configurator::instance()->active, *this);
 }
 
-void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t timestamp)
+bool ComputerInfoList::new_packet(const char *address, double ttime, uint32_t timestamp)
 {
   static unsigned long total = 0;
   printf("\r%lu packets captured", ++total);
@@ -117,6 +122,7 @@ void ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
     save_active(computers, Configurator::instance()->active, *this);
     last_inactive = ttime;
   }
+  return found;
 }
 
 void ComputerInfoList::construct_notify(const std::string &ip, const identity_container &identitites, const TimeSegmentList &s) const

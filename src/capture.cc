@@ -82,6 +82,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
   int size_ethernet;
   int size_ip;
   int size_tcp;
+  bool newIp = false;
   
   /// Ethernet
   size_ethernet = sizeof(struct ether_header);
@@ -173,7 +174,11 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
       /// Save packet
       //ComputerInfoList *computers = reinterpret_cast<ComputerInfoList*>(args);
       n_packets++;
-      computersTcp->new_packet(address, arrival_time, timestamp);
+      newIp = !computersTcp->new_packet(address, arrival_time, timestamp);
+      if(newIp){
+          computersIcmp->to_poke_or_not_to_poke(address);
+          std::cout << "to_poke_or_not_to_poke called on IP: " << address << std::endl;
+      }
       return; // Packet processed
     }
     
