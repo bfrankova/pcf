@@ -98,7 +98,7 @@ void * sendIcmpRequests(void * arg){
     if (sendto(s, buffer, dataLength, 0, (struct sockaddr *) &dst, sizeof(struct sockaddr)) < 0)
       perror("sendto failed\n");
     
-    sleep(5);
+    sleep(3);
   }
 }
 

@@ -25,7 +25,9 @@
 #include <signal.h>
 #include <unistd.h>
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <regex>
 
 #include <pcap.h>
 #include <arpa/inet.h>
@@ -54,6 +56,7 @@ pcap_t *handle;
 
 ComputerInfoList * computersTcp;
 ComputerInfoList * computersIcmp;
+ComputerInfoList * computersJavascript;
 
 void StopCapturing(int signum){
   pcap_breakloop(handle);
@@ -68,12 +71,14 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
   const struct tcphdr *tcp = NULL;
   // ICMP header
   const struct icmphdr *icmp = NULL;
+  std::string httpRequest;
   // Packet arrival time (us)
   double arrival_time;
   // Timestamp
   uint32_t timestamp;
   //
   std::string type = "";
+  char * hl;
   
   // number of processed packets
   static int n_packets = 0;
@@ -97,7 +102,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
     if(ip->ip_p == IPPROTO_ICMP){
       type = "icmp";
       icmp = (struct icmphdr*)(packet + size_ethernet + size_ip);
-      std::cout << "ICMP recieved"<< std::endl;
+      //std::cout << "ICMP recieved"<< std::endl;
     }
     else if (ip->ip_p == IPPROTO_TCP){
       type = "tcp";
@@ -179,6 +184,22 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
           computersIcmp->to_poke_or_not_to_poke(address);
           std::cout << "to_poke_or_not_to_poke called on IP: " << address << std::endl;
       }
+      // parse HTTP
+      hl = (char*)tcp + size_tcp;
+      httpRequest = (std::string) hl;
+      //
+      if(httpRequest.length() == 0)
+        return;
+      
+      std::string ts = "";
+      unsigned int found = httpRequest.find("ts=");
+      if(found)
+        ts = httpRequest.substr(found+3, 13);
+      
+      timestamp = atoi(ts.c_str());
+      computersJavascript->new_packet(address, arrival_time, timestamp);
+      
+      found = 0;
       return; // Packet processed
     }
     
@@ -198,6 +219,9 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
         break;
      }
    }
+  // parse HTTP header
+  
+  
   }
   else if(type == "icmp"){
     // ICMP header
@@ -219,7 +243,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
       // retrieve appropriate timestamp
       unsigned int * newTimestamp = (unsigned int *)icmp + 3;
       timestamp = (uint32_t) ntohl(*newTimestamp);
-      std::cout << "recieved timestamp: " << timestamp << std::endl;
+      //std::cout << "recieved timestamp: " << timestamp << std::endl;
       arrival_time = header->ts.tv_sec + (header->ts.tv_usec / 1000000.0);
       // save packet 
       computersIcmp->new_packet(address, arrival_time, timestamp);
@@ -347,11 +371,15 @@ int StartCapturing() {
   }
 
   computersTcp = new ComputerInfoList("tcp");
+  computersJavascript = new ComputerInfoList("javascript");
   computersIcmp = new ComputerInfoList("icmp");
   // ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
   gnuplot_graph graph_creator_tcp("tcp");
+  gnuplot_graph graph_creator_javascript("javascript");
   gnuplot_graph graph_creator_icmp("icmp");
+  
   computersTcp->AddObserver(&graph_creator_tcp);
+  computersJavascript->AddObserver(&graph_creator_javascript);
   computersIcmp->AddObserver(&graph_creator_icmp);
 
   /// Set interrupt signal (ctrl-c or SIGTERM during capturing means stop capturing)

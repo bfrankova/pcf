@@ -67,7 +67,7 @@ class ComputerInfo {
 
     ~ComputerInfo() {}
     
-    bool firstPacketReceived = false;
+    bool firstPacketReceived;
     
     const std::string& get_address() const
     {
