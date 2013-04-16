@@ -46,9 +46,8 @@ void ComputerInfoList::to_poke_or_not_to_poke(std::string address){
 
 bool ComputerInfoList::new_packet(const char *address, double ttime, uint32_t timestamp)
 {
-  //static unsigned long total = 0;
-  //printf("\r%lu packets captured", ++total);
-  //fflush(stdout);
+  static unsigned long total = 0;
+  std::cout << ++total << ": " << type << std::endl;
 
   bool found = false;
   for (std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it) {
@@ -59,7 +58,6 @@ bool ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
 
     // Computer already known
     ComputerInfo &known_computer = **it;
-    
     if((ttime - known_computer.get_last_packet_time()) < 3)
       return found;
     
@@ -95,7 +93,6 @@ bool ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
       known_computer.restart(ttime, timestamp);
       break;
     }
-
     // Insert packet
     known_computer.insert_packet(ttime, timestamp);
     known_computer.check_block_finish(ttime);

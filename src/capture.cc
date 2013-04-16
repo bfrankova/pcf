@@ -44,6 +44,7 @@
 #include "Configurator.h"
 #include "Debug.h"
 #include "Tools.h"
+#include "ComputerInfoIcmp.h"
 
 /// Capture all packets on the wire
 #define PROMISC 1
@@ -102,7 +103,6 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
     if(ip->ip_p == IPPROTO_ICMP){
       type = "icmp";
       icmp = (struct icmphdr*)(packet + size_ethernet + size_ip);
-      //std::cout << "ICMP recieved"<< std::endl;
     }
     else if (ip->ip_p == IPPROTO_TCP){
       type = "tcp";
@@ -177,29 +177,40 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
       arrival_time = header->ts.tv_sec + (header->ts.tv_usec / 1000000.0);
 
       /// Save packet
-      //ComputerInfoList *computers = reinterpret_cast<ComputerInfoList*>(args);
       n_packets++;
       newIp = !computersTcp->new_packet(address, arrival_time, timestamp);
       if(newIp){
           computersIcmp->to_poke_or_not_to_poke(address);
-          std::cout << "to_poke_or_not_to_poke called on IP: " << address << std::endl;
       }
+      
+      // TODO: remove temporary return
+      // return;
+      
+      int remaining_length = header->len - (size_ethernet + size_ip + size_tcp);
+      // TCP without HTTP
+      if(remaining_length == 0)
+          return;
+      
       // parse HTTP
-      hl = (char*)tcp + size_tcp;
-      httpRequest = (std::string) hl;
-      //
-      if(httpRequest.length() == 0)
-        return;
-      
+      char * hl = (char*)tcp + size_tcp;
+      std::string httpRequest = "";
+      httpRequest.append(hl, remaining_length);
+
+      // find timestamp
       std::string ts = "";
-      unsigned int found = httpRequest.find("ts=");
-      if(found)
-        ts = httpRequest.substr(found+3, 13);
-      
-      timestamp = atoi(ts.c_str());
+      int found = httpRequest.find("ts=");   
+      if(found < 0)
+          return;
+      // check if enough data to read
+      if(found+16 > (int)httpRequest.length())
+          return;
+      ts = httpRequest.substr(found+3, 13);
+      // convert timestamp
+      long long longTimestamp = atoll(ts.c_str());
+      // convert UNIX timestamp to h:m:s:ms
+      longTimestamp = longTimestamp % (3600 * 24 * 1000);
+      // save new packet
       computersJavascript->new_packet(address, arrival_time, timestamp);
-      
-      found = 0;
       return; // Packet processed
     }
     
@@ -243,7 +254,6 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
       // retrieve appropriate timestamp
       unsigned int * newTimestamp = (unsigned int *)icmp + 3;
       timestamp = (uint32_t) ntohl(*newTimestamp);
-      //std::cout << "recieved timestamp: " << timestamp << std::endl;
       arrival_time = header->ts.tv_sec + (header->ts.tv_usec / 1000000.0);
       // save packet 
       computersIcmp->new_packet(address, arrival_time, timestamp);
@@ -373,14 +383,16 @@ int StartCapturing() {
   computersTcp = new ComputerInfoList("tcp");
   computersJavascript = new ComputerInfoList("javascript");
   computersIcmp = new ComputerInfoList("icmp");
+  computersJavascript = new ComputerInfoList("javascript");
   // ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
   gnuplot_graph graph_creator_tcp("tcp");
   gnuplot_graph graph_creator_javascript("javascript");
   gnuplot_graph graph_creator_icmp("icmp");
-  
+  gnuplot_graph graph_creator_javascript("javascript");
   computersTcp->AddObserver(&graph_creator_tcp);
   computersJavascript->AddObserver(&graph_creator_javascript);
   computersIcmp->AddObserver(&graph_creator_icmp);
+  computersJavascript->AddObserver(&graph_creator_javascript);
 
   /// Set interrupt signal (ctrl-c or SIGTERM during capturing means stop capturing)
   struct sigaction sigact;

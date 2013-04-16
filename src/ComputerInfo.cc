@@ -32,6 +32,7 @@
 #include "TimeSegmentList.h"
 #include "Configurator.h"
 #include "ComputerInfo.h"
+#include "check_computers.h"
 
 const size_t STRLEN_MAX = 100;
 
@@ -41,6 +42,7 @@ ComputerInfo::ComputerInfo(void * parentList, const char* its_address):
   packets(), freq(0), confirmedSkew(UNDEFINED_SKEW, UNDEFINED_SKEW), packetSegmentList(), address(its_address)
 {
   this->parentList = parentList;
+  firstPacketReceived = false;
 }
 
 void ComputerInfo::insert_first_packet(double packet_delivered, uint32_t timestamp){
@@ -419,9 +421,7 @@ int ComputerInfo::compute_freq()
   else if (freq >= 230 && freq <= 270)
     freq = 250;
   
-#ifdef DEBUG
   printf("Frequency (Hz): %d\n", freq);
-#endif
   
   return freq;
 }

@@ -72,6 +72,7 @@ void * sendIcmpRequests(void * arg){
   }
   // convert IP
   dst.sin_family = AF_INET;
+  dst.sin_port = 0;
   if (inet_pton(AF_INET, computer->address.c_str(), &(dst.sin_addr)) != 1) {
     perror("could not convert IP");
   }

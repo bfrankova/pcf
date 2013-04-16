@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="88">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <df root="." name="src">
+    <df name="src" root=".">
+      <df name="graph">
+      </df>
+      <df name="log">
+      </df>
+      <df name="www">
+        <df name="data">
+        </df>
+        <df name="graph">
+        </df>
+      </df>
       <in>AnalysisInfo.h</in>
       <in>ClockSkewPair.h</in>
       <in>Computations.cc</in>
