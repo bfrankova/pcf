@@ -383,14 +383,11 @@ int StartCapturing() {
   computersTcp = new ComputerInfoList("tcp");
   computersJavascript = new ComputerInfoList("javascript");
   computersIcmp = new ComputerInfoList("icmp");
-  computersJavascript = new ComputerInfoList("javascript");
   // ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
   gnuplot_graph graph_creator_tcp("tcp");
   gnuplot_graph graph_creator_javascript("javascript");
   gnuplot_graph graph_creator_icmp("icmp");
-  gnuplot_graph graph_creator_javascript("javascript");
   computersTcp->AddObserver(&graph_creator_tcp);
-  computersJavascript->AddObserver(&graph_creator_javascript);
   computersIcmp->AddObserver(&graph_creator_icmp);
   computersJavascript->AddObserver(&graph_creator_javascript);
 

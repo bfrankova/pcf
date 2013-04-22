@@ -1,66 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="88">
-  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <df root="." name="src">
-      <df name="graph">
-        <df name="icmp">
-        </df>
-        <df name="javascript">
-        </df>
-      </df>
-      <df name="log">
-        <df name="icmp">
-        </df>
-        <df name="javascript">
-        </df>
-      </df>
-      <df name="www">
-        <df name="data">
-          <df name="icmp">
-          </df>
-          <df name="javascript">
-          </df>
-        </df>
-        <df name="graph">
-          <df name="icmp">
-          </df>
-          <df name="javascript">
-          </df>
-        </df>
-      </df>
-      <in>AnalysisInfo.h</in>
-      <in>ClockSkewPair.h</in>
-      <in>Computations.cc</in>
-      <in>Computations.h</in>
-      <in>ComputerInfo.cc</in>
-      <in>ComputerInfo.h</in>
-      <in>ComputerInfoIcmp.cc</in>
-      <in>ComputerInfoIcmp.h</in>
-      <in>ComputerInfoList.cc</in>
-      <in>ComputerInfoList.h</in>
-      <in>Configurator.cc</in>
-      <in>Configurator.h</in>
-      <in>Debug.h</in>
-      <in>Observable.h</in>
-      <in>Observer.h</in>
-      <in>PacketSegment.h</in>
-      <in>PacketTimeInfo.h</in>
-      <in>Point.h</in>
-      <in>TimeSegment.h</in>
-      <in>TimeSegmentList.cc</in>
-      <in>TimeSegmentList.h</in>
-      <in>Tools.cc</in>
-      <in>Tools.h</in>
-      <in>capture.cc</in>
-      <in>capture.h</in>
-      <in>check_computers.cc</in>
-      <in>check_computers.h</in>
-      <in>gnuplot_graph.cc</in>
-      <in>gnuplot_graph.h</in>
-      <in>log_reader.cc</in>
-      <in>main.cc</in>
-    </df>
-  </logicalFolder>
+<configurationDescriptor version="80">
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Default" type="0">
@@ -80,6 +19,8 @@
         </gdb_options>
         <gdb_buildfirst gdb_buildfirst_overriden="false" gdb_buildfirst_old="false"/>
       </dbx_gdbdebugger>
+      <gizmo_options version="3">
+      </gizmo_options>
       <nativedebugger version="1">
         <engine>gdb</engine>
       </nativedebugger>

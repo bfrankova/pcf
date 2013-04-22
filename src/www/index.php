@@ -10,38 +10,34 @@
 </head>
 
 <body onload="loadCookies1()">
-
-<div id="head">
-<font size="1"><br /></font>
-<font color=0000b2 size="7" face="Verdana"><b><center><a href="index.php">pcf</a></center></b></font>
-</div>
-
-<div id="menu">
-<ul>
-<li><a class="selected" href="index.php">Active computers</a></li>
-<li><a href="all_graphs.php">All graphs</a></li>
-<li><a href="saved_computers.php">Saved computers</a></li>
-</ul>
-</div>
+	
+<?php 
+$selected="active";
+include "header.php"; 
+?>
 
 <div id="content">
 <div id="aktual">
 
 <?php
 
+error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
+
+function debugOutput($message)
+{
+	echo "<div style=\"color: red; background-color: yellow; \">$message</div>";
+}
+
 if (isset($_POST["name"])) {
-
 	$database = "data/database.xml";
-
+	
 	if (!file_exists($database)) {
 		$xmlDoc = new DOMDocument();
 		$root = $xmlDoc->appendChild($xmlDoc->createElement("computers"));
 		$xmlDoc->formatOutput = true;
 		$xmlDoc->save($database);
 	}
-        
 	$computers = simplexml_load_file($database);
-
 	$computer = $computers->addChild("computer");
 	$computer->addAttribute("skew", $_POST["skew"]);
 
@@ -63,7 +59,7 @@ if (file_exists($active)) {
 	$computers = simplexml_load_file($active);
 }
 else {
-	#exit("Failed to open $filename");
+	exit("Failed to open $filename");
 	exit();
 }
 
@@ -105,6 +101,7 @@ foreach ($computers->computer as $computer) {
 }
 
 echo "<br />";
+
 
 foreach ($computers->computer as $computer) {
 	if (!isset($computer->identity)) {
