@@ -1,1 +1,1 @@
-barbora.frankova = Barbora Frankova <barbora.frankova@gmail.com>
+bfrankova = Barbora Frankova <barbora.frankova@gmail.com>
