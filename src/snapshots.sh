@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-rm -rf graph/* log/* www/graph/*
-
-mkdir graph/icmp log/icmp www/graph/icmp
-
 while [ 1 ]
 do
 	TIME=`date "+%Y-%m-%d-%H-%M"`
