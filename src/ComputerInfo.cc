@@ -431,7 +431,7 @@ int ComputerInfo::compute_freq()
 int ComputerInfo::save_packets(short rewrite)
 {
   FILE *f;
-  char filename[50] = "log/";
+  char filename[80] = "log/";
   std::strcat(filename, static_cast<ComputerInfoList *>(parentList)->getOutputDirectory().c_str());
   std::strcat(filename, get_address().c_str());
   std::strcat(filename, ".log");

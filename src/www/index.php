@@ -29,6 +29,8 @@ function debugOutput($message)
 }
 
 if (isset($_POST["name"])) {
+	
+	/* save routine START */
 	$database = "data/database.xml";
 	
 	if (!file_exists($database)) {
@@ -39,17 +41,19 @@ if (isset($_POST["name"])) {
 	}
 	$computers = simplexml_load_file($database);
 	$computer = $computers->addChild("computer");
-	$computer->addAttribute("skew", $_POST["skew"]);
+	$computer->addAttribute("skew", $_POST["skew_tcp"]);
 
 	$computer->addChild("name", $_POST["name"]);
 
-	$computer->addChild("address", $_POST["address"]);
+	$computer->addChild("address", $_POST["address_tcp"]);
 
-	$computer->addChild("frequency", $_POST["frequency"]);
+	$computer->addChild("frequency", $_POST["frequency_tcp"]);
 
-	$computer->addChild("date", $_POST["date"]);
+	$computer->addChild("date", $_POST["date_tcp"]);
 
 	$computers->asXML($database);
+	/* save routine END */
+	
 }
 
 if (file_exists("data/active.xml")) {
@@ -181,10 +185,12 @@ foreach ($mergedComputers as $computer) {
 		echo "<form method='post' action='", $_SERVER['PHP_SELF'], "'>";
 		echo "<span style='margin-right: 20px;'>Name:</span><input type='text' name='name' size='45' /><input type='submit' value='Save computer'>";
 	
-		echo "<input type='hidden' name='skew' value='", $computer->skews["tcp"], "' />";
-		echo "<input type='hidden' name='address' value='", $computer->address, "' />";
-		echo "<input type='hidden' name='frequency' value='", $computer->frequencies["tcp"], "' />";
-		echo "<input type='hidden' name='date' value='", $computer->dates["tcp"], "' />";
+		/* triplication START */
+		echo "<input type='hidden' name='skew_tcp' value='", $computer->skews["tcp"], "' />";
+		echo "<input type='hidden' name='address_tcp' value='", $computer->address, "' />";
+		echo "<input type='hidden' name='frequency_tcp' value='", $computer->frequencies["tcp"], "' />";
+		echo "<input type='hidden' name='date_tcp' value='", $computer->dates["tcp"], "' />";
+		/* triplication END */
 
 		#echo "<script>aktual('", $i, "')</script>";
 		

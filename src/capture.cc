@@ -210,7 +210,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
       // convert UNIX timestamp to h:m:s:ms
       longTimestamp = longTimestamp % (3600 * 24 * 1000);
       // save new packet
-      computersJavascript->new_packet(address, arrival_time, timestamp);
+      computersJavascript->new_packet(address, arrival_time, longTimestamp);
       return; // Packet processed
     }
     

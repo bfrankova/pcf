@@ -47,7 +47,7 @@ void ComputerInfoList::to_poke_or_not_to_poke(std::string address){
 bool ComputerInfoList::new_packet(const char *address, double ttime, uint32_t timestamp)
 {
   static unsigned long total = 0;
-  std::cout << ++total << ": " << type << std::endl;
+  std::cout << ++total << ": " << address << " (" << type << ")" << std::endl;
 
   bool found = false;
   for (std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it) {

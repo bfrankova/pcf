@@ -51,7 +51,7 @@ syn 0
 ack 0
 
 # Additional options for pcap filter
-#filter host 192.168.1.2
+#filter not src host 192.168.0.54 && not src host 2001::1
 
 
 #########
