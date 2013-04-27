@@ -79,7 +79,6 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
   uint32_t timestamp;
   //
   std::string type = "";
-  char * hl;
   
   // number of processed packets
   static int n_packets = 0;
