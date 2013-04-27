@@ -32,9 +32,9 @@ include "header.php";
 		$inputDirectory = $type . "/";
 	}
 	$directory = "graph/" . $inputDirectory;
-	$graphs = array_diff(scandir($directory), array('..', '.','.gitignore', 'javascript', 'icmp'));
-	foreach ($graphs as $graph) {
-		echo "<img src='graph/$graph' alt='$graph'></img>";
+	$files = array_diff(scandir($directory), array('..', '.','.gitignore', 'javascript', 'icmp'));
+	foreach ($files as $file) {
+		echo "<img src='graph/" . $inputDirectory . $file . "' alt='$graph'></img>";
 	}
 ?>
 </center>

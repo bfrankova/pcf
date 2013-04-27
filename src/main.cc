@@ -26,9 +26,6 @@
 #include "capture.h"
 #include "check_computers.h"
 #include "Configurator.h"
-#include "Debug.h"
-
-int debug = false;
 
 /**
  * Print banner
@@ -78,10 +75,13 @@ int main(int argc, char *argv[])
   /// Get params
   int c;
   opterr = 0;
-  while ((c = getopt(argc, argv, "dhn:t:p:")) != -1) {
+  while ((c = getopt(argc, argv, "idhn:t:p:")) != -1) {
     switch(c) {
+      case('i'):
+        Configurator::instance()->icmpDisable = true;
+        break;
       case 'd':
-        debug = true;
+        Configurator::instance()->debug = true;
         break;
       case 'h':
         print_help();

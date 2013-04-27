@@ -43,6 +43,8 @@ Configurator * Configurator::instance() {
  */
 void Configurator::Init()
 {
+  icmpDisable = false;
+  debug = false;
   number = 0;
   time = 0;
   port = 0;

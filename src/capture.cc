@@ -42,7 +42,6 @@
 #include "ComputerInfoList.h"
 #include "gnuplot_graph.h"
 #include "Configurator.h"
-#include "Debug.h"
 #include "Tools.h"
 #include "ComputerInfoIcmp.h"
 
@@ -77,6 +76,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
   double arrival_time;
   // Timestamp
   uint32_t timestamp;
+  int pokeOk = true;
   //
   std::string type = "";
   
@@ -120,6 +120,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
   /// IPv6
   else if (ether_type == 0x86dd) { 
     // IP header
+    pokeOk = false;
     const struct ip6_hdr *ip  = (struct ip6_hdr*)(packet + size_ethernet);
     size_ip = sizeof(struct ip6_hdr);
     /// Check if the packet is TCP
@@ -133,6 +134,16 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
       fprintf(stderr, "Cannot get IP address\n");
       return;
     }
+    // replace colons with dashes (because of Win filenames conventions)
+    std::string replaceColon = "-";
+    std::string findColon = ":";
+    std::string address6 = (std::string) address;
+    for(std::string::size_type i = 0; (i = address6.find(findColon, i)) != std::string::npos;)
+    {
+        address6.replace(i, findColon.length(), replaceColon);
+        i += replaceColon.length() - findColon.length() + 1;
+    }
+    strcpy(address, address6.c_str());
   }
   else
   {
@@ -144,14 +155,14 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
     // skip TCP headers
   size_tcp = tcp->doff*4;
   if (size_tcp < 20) {
-    if(debug)
+    if(Configurator::instance()->debug)
       std::cerr << "Invalid TCP header length: " << size_tcp << " bytes" << std::endl;
     return;
   }
   
   // For sure, should filter pcap
   if (size_tcp == 20) {
-    if(debug)
+    if(Configurator::instance()->debug)
       std::cout << "TCP header without options" << std::endl;
     return;
   }
@@ -179,6 +190,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
       n_packets++;
       newIp = !computersTcp->new_packet(address, arrival_time, timestamp);
       if(newIp){
+        if(pokeOk && !Configurator::instance()->icmpDisable)
           computersIcmp->to_poke_or_not_to_poke(address);
       }
       
@@ -216,7 +228,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
     switch(kind) {
       /// EOL
       case 0:
-        if(debug)
+        if(Configurator::instance()->debug)
           std::cout << "TCP header option without timestamp" << std::endl;
         return;
       /// NOP
@@ -290,7 +302,7 @@ int StartCapturing() {
     }
   }
   
-  if(debug)
+  if(Configurator::instance()->debug)
       std::cout << "DEV: " << dev << std::endl;
   
   /// Find address and netmask for the device
@@ -300,7 +312,7 @@ int StartCapturing() {
     if (net == NULL)
         std::cerr << "Can't convert net address" << std::endl;
     else {
-        if(debug)
+        if(Configurator::instance()->debug)
             std::cout << "NET: " << net << std::endl;
     }
   
@@ -310,7 +322,7 @@ int StartCapturing() {
     if (mask == NULL)
         std::cerr << "Can't convert net mask" << std::endl;
     else {
-        if(debug)
+        if(Configurator::instance()->debug)
             std::cout << "MASK: " << mask << std::endl;
     }
   }
@@ -353,13 +365,14 @@ int StartCapturing() {
   }
   // Filter
   if (strcmp(Configurator::instance()->filter, "") != 0) {
-      filter += " && ";
+      filter += " && (";
       filter += Configurator::instance()->filter;
+      filter += ")";
   }
   
   filter += ") || (icmp && icmp[icmptype] == icmp-tstampreply)";
   
-  if(debug)
+  if(Configurator::instance()->debug)
       std::cout << "Filter: " << filter << std::endl;
   
   if (pcap_compile(handle, &fp, filter.c_str(), 0, PCAP_NETMASK_UNKNOWN) == -1) {

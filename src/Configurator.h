@@ -32,6 +32,9 @@ private:
     
 public:
   Configurator() {};
+  
+  int icmpDisable;
+  bool debug;
     
   char dev[10];
   int number;

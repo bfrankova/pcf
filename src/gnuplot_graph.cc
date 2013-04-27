@@ -141,6 +141,8 @@ void gnuplot_graph::generate_graph(const AnalysisInfo &changed_skew)
   fputs(tmp, f);
   fputs("\\n", f);
   fputs(address.c_str(), f);
+  fputs("\\n", f);
+  fputs(type.c_str(), f);
 
   // Search for computers with similar skew
   identity_container similar_devices = changed_skew.SimilarIdentities;

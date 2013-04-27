@@ -40,7 +40,6 @@
       <in>ComputerInfoList.h</in>
       <in>Configurator.cc</in>
       <in>Configurator.h</in>
-      <in>Debug.h</in>
       <in>Observable.h</in>
       <in>Observer.h</in>
       <in>PacketSegment.h</in>

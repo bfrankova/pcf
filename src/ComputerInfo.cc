@@ -149,19 +149,6 @@ void ComputerInfo::recompute_block(double packet_delivered)
           confirmedSkew.Alpha, confirmedSkew.Beta, last_skew.last->Offset.x);
 #endif
 
-#ifndef DONOTREDUCE
-      // Reduce packets
-      if (packets.size() > (unsigned int)(Configurator::instance()->block * 5)) {
-        reduce_packets(last_skew.first, last_skew.confirmed);
-      }
-#endif
-    }
-    else {
-#ifndef DONOTREDUCE
-      // Reduce packets
-      reduce_packets(last_skew.first, last_skew.confirmed);
-#endif
-
       add_empty_packet_segment(--packets.end());
       confirmedSkew.Alpha = UNDEFINED_SKEW;
       confirmedSkew.Beta = UNDEFINED_SKEW;
@@ -214,70 +201,6 @@ void ComputerInfo::add_empty_packet_segment(packetTimeInfoList::iterator start)
   printf("%s: New empty skew first: %g, confirmed %g, last: %g\n", address.c_str(), (skew.first)->Offset.x, (skew.confirmed)->Offset.x, (skew.last)->Offset.x);
 #endif
 }
-
-
-
-void ComputerInfo::reduce_packets(packet_iterator start, packet_iterator end)
-{
-#ifdef DEBUG
-  printf("Reduction for IP %s start: %u packets\n", address.c_str(), (unsigned int) packets.size());
-#endif
-  packet_iterator current = start;
-  ++current;
-  if ((current == packets.end()) || (current == end)) {
-    return;
-  }
-
-  while ((current != packets.end()) && (current != end)) {
-    packet_iterator prev = current;
-    --prev;
-    packet_iterator next = current;
-    ++next;
-    if ((next == end) || (next == packets.end())) {
-      break; // We can't reduce the last packet
-    }
-    double prev_x = prev->Offset.x;
-    double curr_x = current->Offset.x;
-    double next_x = next->Offset.x;
-    double prev_y = prev->Offset.y;
-    double curr_y = current->Offset.y;
-    double next_y = next->Offset.y;
-    bool reduce = false;
-    if ((prev_y > curr_y) && (curr_y < next_y)) {
-      reduce = true;
-    }
-    else if ((prev_y <= curr_y) && (curr_y < next_y)) {
-      double tan_curr = (curr_y - prev_y) / (curr_x - prev_x);
-      double tan_next = (next_y - prev_y) / (next_x - prev_x);
-      if (tan_curr <= tan_next) {
-        reduce = true;
-      }
-    }
-    else if ((prev_y > curr_y) && (curr_y >= next_y)) {
-      double tan_curr = (curr_y - next_y) / (next_x - curr_x);
-      double tan_prev = (prev_y - next_y) / (next_x - prev_x);
-      if (tan_curr <= tan_prev) {
-        reduce = true;
-      }
-    }
-
-    if (reduce) {
-      current = packets.erase(current);
-      --current; // Check previous packet again
-      if (current == start) {
-        ++current; // unless it is the first one
-      }
-    }
-    else {
-      ++current;
-    }
-  }
-#ifdef DEBUG
-  printf("Reduction for IP %s end: %u packets\n", address.c_str(), (unsigned int)packets.size());
-#endif
-}
-
-
 
 ClockSkewPair ComputerInfo::compute_skew(const packet_iterator &start, const packet_iterator &end)
 {
