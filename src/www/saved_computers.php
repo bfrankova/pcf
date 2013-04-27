@@ -11,18 +11,11 @@
 
 <body onload="loadCookies2()">
 
-<div id="head">
-<font size="1"><br /></font>
-<font color=0000b2 size="7" face="Verdana"><b><center><a href="index.php">pcf</a></center></b></font>
-</div>
-
-<div id="menu">
-<ul>
-<li><a href="index.php">Active computers</a></li>
-<li><a href="all_graphs.php">All graphs</a></li>
-<li><a class="selected" href="saved_computers.php">Saved computers</a></li>
-</ul>
-</div>
+	
+<?php 
+$selected="saved";
+include "header.php"; 
+?>
 
 <div id="content">
 <div id="aktual">

@@ -25,8 +25,10 @@
 
 #include "capture.h"
 #include "check_computers.h"
-#include "parse_config.h"
+#include "Configurator.h"
+#include "Debug.h"
 
+int debug = false;
 
 /**
  * Print banner
@@ -71,35 +73,34 @@ int main(int argc, char *argv[])
   
   /// Get config
   char filename[] = "config";
-  pcf_config *config = get_config(filename);
-  if (config == NULL) {
-    fprintf(stderr, "Cannot parse config file: %s", filename);
-    return(2);
-  }
+  Configurator::instance()->GetConfig(filename);
   
   /// Get params
   int c;
   opterr = 0;
-  while ((c = getopt(argc, argv, "hn:t:p:")) != -1) {
+  while ((c = getopt(argc, argv, "dhn:t:p:")) != -1) {
     switch(c) {
+      case 'd':
+        debug = true;
+        break;
       case 'h':
         print_help();
         return(0);
       case 'n':
         if (atoi(optarg))
-          config->number = atoi(optarg);
+          Configurator::instance()->number = atoi(optarg);
         else
           fprintf(stderr, "Wrong number of packets\n");
         break;
       case 't':
         if (atoi(optarg))
-          config->time = atoi(optarg);
+          Configurator::instance()->time = atoi(optarg);
         else
           fprintf(stderr, "Wrong time for capturing\n");
         break;
       case 'p':
         if (atoi(optarg) && (atoi(optarg) < 65535))
-          config->port = atoi(optarg);
+          Configurator::instance()->port = atoi(optarg);
         else
           fprintf(stderr, "Wrong port number\n");
         break;
@@ -108,21 +109,16 @@ int main(int argc, char *argv[])
   c = optind;
   if (c < argc) {
     if (strlen(argv[c]) < 10)
-      strcpy(config->dev, argv[c]);
+      strcpy(Configurator::instance()->dev, argv[c]);
     else {
       fprintf(stderr, "Device name too long (%s)\nSetting to any", argv[c]);
-      strcpy(config->dev, "any");
+      strcpy(Configurator::instance()->dev, "any");
     }
   }
   
   /// Get packets
-  if (capture(config) != 0)
+  if (StartCapturing() != 0)
     return(2);
-  
-  printf("\n\n");
-  
-  /// Free memory
-  free_config(config);
   
   return(0);
 }

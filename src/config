@@ -39,7 +39,7 @@ time 0
 port 80
 
 # Source address
-#src_address 192.168.1.2
+#src_address 192.168.0.109
 
 # Destination address
 #dst_address 192.168.1.217
@@ -51,7 +51,7 @@ syn 0
 ack 0
 
 # Additional options for pcap filter
-#filter host 192.168.1.2
+#filter not src host 192.168.0.54 && not src host 2001::1
 
 
 #########
@@ -59,10 +59,10 @@ ack 0
 #########
 
 # Active computers
-active www/data/active.xml
+active active.xml
 
 # Saved computers
-database www/data/database.xml
+database database.xml
 
 
 ########################################
@@ -74,7 +74,7 @@ database www/data/database.xml
 THRESHOLD 0.001
 
 # Number of packets to do block operations
-BLOCK 50
+BLOCK 40
 
 # Time limit for removing old lists (seconds)
 TIME_LIMIT 3600

@@ -17,31 +17,51 @@
  * along with pcf. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CAPTURE_H
-#define _CAPTURE_H
+#ifndef _CONFIGURATOR_H
+#define _CONFIGURATOR_H
 
-#include <arpa/inet.h>
-#include <pcap.h>
 #include <string>
 
+/**
+ * Structure with all config data
+ */
 
-    /**
-     * Capture packets
-     * @param[in] config   Config data
-     * @return 0           if ok
-     */
-     int StartCapturing();
+class Configurator {
+private:
+    static Configurator * innerInstance;
+    
+public:
+  Configurator() {};
+    
+  char dev[10];
+  int number;
+  unsigned int time;
+  int port;
+  char src[16];
+  char dst[16];
+  short syn;
+  short ack;
+  char filter[4096];
+  
+  char active[1024];
+  char database[1024];
+  static const std::string xmlDir;
+  
+  int block;
+  int timeLimit;
+  double threshold;
+  
+  
+  void Init();
 
-    /**
-     * Signal handler to stop capturing
-     */
-     void StopCapturing(int signum);
+  /**
+   * Fill the config structure
+   * @param[in] filename          Config file name
+   */
+  void GetConfig(const char *filename);
+  
+  static Configurator * instance();
+};
 
-    /** 
-     * Callback function for pcap
-     * @param[in] args     User params
-     * @param[in] header   Packet header
-     * @param[in] packet   Packet
-     */
-     void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
+
 #endif

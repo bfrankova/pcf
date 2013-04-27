@@ -21,8 +21,8 @@
 #include<iostream>
 #include<fstream>
 
-#include "parse_config.h"
-#include "computer_info_list.h"
+#include "Configurator.h"
+#include "ComputerInfoList.h"
 #include "gnuplot_graph.h"
 
 /**
@@ -41,11 +41,11 @@ void print_help()
 /**
  * Read the content of the log file and process it
  */
-void process_log_file(std::ifstream &ifs, pcf_config *config)
+void process_log_file(std::ifstream &ifs)
 {
-  computer_info_list computers(config->active, config->database, config->block, config->time_limit, config->threshold);
+  ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
   gnuplot_graph graph_creator;
-  computers.add_observer(&graph_creator);
+  computers.AddObserver(&graph_creator);
 
   double ttime, offset;
 
@@ -70,11 +70,7 @@ int main(int argc, char *argv[])
 
   // Get config
   char filename[] = "config";
-  pcf_config *config = get_config(filename);
-  if (config == NULL) {
-    fprintf(stderr, "Cannot parse config file: %s", filename);
-    return(2);
-  }
+  Configurator::instance()->GetConfig(filename);
 
   // Open log file
   std::ifstream ifs (argv[1], std::ifstream::in);
@@ -83,5 +79,5 @@ int main(int argc, char *argv[])
     return 2;
   }
 
-  process_log_file(ifs, config);
+  process_log_file(ifs);
 }
