@@ -122,7 +122,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
     /// Check if the packet is TCP
     if (ip->ip6_ctlun.ip6_un1.ip6_un1_nxt != IPPROTO_TCP)
       return;
-
+    type = "tcp";
     /// TCP
     tcp = (struct tcphdr*) (packet + size_ethernet + size_ip);
     if (inet_ntop(AF_INET6, &(ip->ip6_src), address, 64) == NULL) {
