@@ -24,6 +24,7 @@
 
 #include "TimeSegment.h"
 #include "gnuplot_graph.h"
+#include "Configurator.h"
 
 const size_t STRLEN_MAX = 100;
 
@@ -35,9 +36,8 @@ void time_to_str(char *buffer, size_t buffer_size, time_t time)
 
 void gnuplot_graph::Notify(const AnalysisInfo& changed_skew)
 {
-#ifdef DEBUG
-  printf("gnuplot_graph::notify %s\n", changed_skew.Address.c_str());
-#endif
+  if(Configurator::instance()->debug)
+    printf("gnuplot_graph::notify %s\n", changed_skew.Address.c_str());
   generate_graph(changed_skew);
 }
 

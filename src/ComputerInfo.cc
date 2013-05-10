@@ -77,11 +77,11 @@ void ComputerInfo::insert_packet(double packet_delivered, uint32_t timestamp)
 
 void ComputerInfo::check_block_finish(double packet_delivered)
 {
-  recompute_block(packet_delivered);
-  /*if (((get_packets_count() % Configurator::instance()->block) == 0) ||
+  //recompute_block(packet_delivered);
+  if (((get_packets_count() % Configurator::instance()->block) == 0) ||
       ((packet_delivered - lastConfirmedPacketTime) > SKEW_VALID_AFTER)) {
     recompute_block(packet_delivered);
-  }*/
+  }
 }
 
 
@@ -131,12 +131,10 @@ void ComputerInfo::recompute_block(double packet_delivered)
 
   last_skew.alpha = new_skew.Alpha;
   last_skew.beta = new_skew.Beta;
-  
-  std::cout << static_cast<ComputerInfoList*>(parentList)->getOutputDirectory() << new_skew.Alpha << std::endl;
 
   if ((packet_delivered - lastConfirmedPacketTime) > SKEW_VALID_AFTER) {
     ClockSkewPair last_skew_pair = compute_skew(last_skew.confirmed, packets.end());
-    if ((std::fabs(last_skew_pair.Alpha - confirmedSkew.Alpha) < 10*0.001) ||
+    if ((std::fabs(last_skew_pair.Alpha - confirmedSkew.Alpha) < 10*Configurator::instance()->threshold) ||
         (std::isnan(confirmedSkew.Alpha))) {
       // New skew confirmed
       confirmedSkew.Alpha = new_skew.Alpha;
@@ -148,7 +146,8 @@ void ComputerInfo::recompute_block(double packet_delivered)
       printf("%s: New skew confirmed (%g, %g), time %g\n", address.c_str(),
           confirmedSkew.Alpha, confirmedSkew.Beta, last_skew.last->Offset.x);
 #endif
-
+    }
+    else {
       add_empty_packet_segment(--packets.end());
       confirmedSkew.Alpha = UNDEFINED_SKEW;
       confirmedSkew.Beta = UNDEFINED_SKEW;

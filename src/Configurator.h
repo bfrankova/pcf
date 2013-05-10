@@ -53,6 +53,7 @@ public:
   int block;
   int timeLimit;
   double threshold;
+  bool logReader;
   
   
   void Init();

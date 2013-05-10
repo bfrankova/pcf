@@ -17,9 +17,9 @@
  * along with pcf. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include<cstring>
-#include<iostream>
-#include<fstream>
+#include <cstring>
+#include <iostream>
+#include <fstream>
 
 #include "Configurator.h"
 #include "ComputerInfoList.h"
@@ -43,16 +43,19 @@ void print_help()
  */
 void process_log_file(std::ifstream &ifs)
 {
-  ComputerInfoList computers(Configurator::instance()->active, Configurator::instance()->database, Configurator::instance()->block, Configurator::instance()->timeLimit, Configurator::instance()->threshold);
-  gnuplot_graph graph_creator;
-  computers.AddObserver(&graph_creator);
-
+  ComputerInfoList * computers = new ComputerInfoList("tcp");
+  gnuplot_graph graph_creator("tcp");
+  computers->AddObserver(&graph_creator);
+  
+  
   double ttime, offset;
 
   while (ifs.good()) {
     ifs >> ttime >> offset;
+    //offset = offset / 1000;
     if (ifs.good()) {
-      computers.new_packet("log_reader", ttime, ttime + offset);
+      std::cout << ttime << " " << ttime + offset << std::endl;
+      computers->new_packet("log_reader", ttime, ttime + offset);
     }
   }
 }
@@ -71,7 +74,7 @@ int main(int argc, char *argv[])
   // Get config
   char filename[] = "config";
   Configurator::instance()->GetConfig(filename);
-
+  Configurator::instance()->logReader = true;
   // Open log file
   std::ifstream ifs (argv[1], std::ifstream::in);
   if (ifs.fail()) {

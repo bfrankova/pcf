@@ -26,6 +26,7 @@
 #include "Point.h"
 #include "PacketTimeInfo.h"
 #include "Computations.h"
+#include "Configurator.h"
 
 void Computations::SwapPoints(Point *x, Point *y) {
    Point tmp;
@@ -75,8 +76,9 @@ void Computations::SetOffset(PacketTimeInfo &packet, const PacketTimeInfo &head,
   tmp /= freq;
   tmp -= packet.Offset.x;
 
-  // s -> ms
-  tmp *= 1000;
+  if(!Configurator::instance()->logReader)
+    // s -> ms
+    tmp *= 1000;
 
   packet.Offset.y = tmp;
 }

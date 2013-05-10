@@ -30,53 +30,50 @@
 /**
  * Print banner
  */
-void print_banner()
-{
+void print_banner() {
   printf("pcf  Copyright (C) 2012 Jakub Jirasek <xjiras02@stud.fit.vutbr.cz>\n\n"
-         "This program comes with ABSOLUTELY NO WARRANTY.\n"
-         "This is free software, and you are welcome to redistribute it\n"
-         "under certain conditions.\n\n");
+          "This program comes with ABSOLUTELY NO WARRANTY.\n"
+          "This is free software, and you are welcome to redistribute it\n"
+          "under certain conditions.\n\n");
 }
 
 /**
  * Print help
  */
-void print_help()
-{
+void print_help() {
   printf("Usage: pcf [Options] [Interface]\n\n"
-         "  -h\t\tPrint this help\n"
-         "  -n\t\tNumber of packets to capture (0 for infinity)\n"
-         "  -t\t\tTime for capturing (in seconds, 0 for infinity)\n"
-         "  -p\t\tPort number (1-65535)\n\n"
-         "Examples:\n"
-         "  pcf\n"
-         "  pcf -n 100 -t 600 -p 80 wlan0\n\n");
+          "  -h\t\tPrint this help\n"
+          "  -n\t\tNumber of packets to capture (0 for infinity)\n"
+          "  -t\t\tTime for capturing (in seconds, 0 for infinity)\n"
+          "  -p\t\tPort number (1-65535)\n\n"
+          "Examples:\n"
+          "  pcf\n"
+          "  pcf -n 100 -t 600 -p 80 wlan0\n\n");
 }
 
 /**
  * Main
  */
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   /// Print banner
   print_banner();
-  
+
   /// Checking permissions (must be root)
   if (getuid()) {
     fprintf(stderr, "Must have root permissions to run this program!\n");
-    return(2);
+    return (2);
   }
-  
+
   /// Get config
   char filename[] = "config";
   Configurator::instance()->GetConfig(filename);
-  
+
   /// Get params
   int c;
   opterr = 0;
   while ((c = getopt(argc, argv, "idhn:t:p:")) != -1) {
-    switch(c) {
+    switch (c) {
       case('i'):
         Configurator::instance()->icmpDisable = true;
         break;
@@ -85,7 +82,7 @@ int main(int argc, char *argv[])
         break;
       case 'h':
         print_help();
-        return(0);
+        return (0);
       case 'n':
         if (atoi(optarg))
           Configurator::instance()->number = atoi(optarg);
@@ -115,10 +112,10 @@ int main(int argc, char *argv[])
       strcpy(Configurator::instance()->dev, "any");
     }
   }
-  
+
   /// Get packets
   if (StartCapturing() != 0)
-    return(2);
-  
-  return(0);
+    return (2);
+
+  return (0);
 }

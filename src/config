@@ -74,7 +74,7 @@ database database.xml
 THRESHOLD 0.001
 
 # Number of packets to do block operations
-BLOCK 40
+BLOCK 50
 
 # Time limit for removing old lists (seconds)
 TIME_LIMIT 3600

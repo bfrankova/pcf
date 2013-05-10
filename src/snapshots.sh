@@ -5,5 +5,5 @@ do
 	TIME=`date "+%Y-%m-%d-%H-%M"`
 	tar cvf "graphs-$TIME.tar" graph/ log/ www/graph/
 	echo "$TIME"
-	sleep 1m
+	sleep 60m
 done

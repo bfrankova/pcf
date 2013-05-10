@@ -20,7 +20,7 @@
 program = pcf
 
 OBJ = capture.o main.o ComputerInfoList.o Configurator.o Computations.o check_computers.o ComputerInfo.o ComputerInfoIcmp.o gnuplot_graph.o TimeSegmentList.o Tools.o
-LOG_READER_OBJ = log_reader.o ComputerInfoList.o Configurator.o computations.o check_computers.o ComputerInfo.o ComputerInfoIcmp.o gnuplot_graph.o TimeSegmentList.o
+LOG_READER_OBJ = log_reader.o ComputerInfoList.o Configurator.o Computations.o check_computers.o ComputerInfo.o ComputerInfoIcmp.o gnuplot_graph.o TimeSegmentList.o
 HEAD = capture.h ComputerInfoList.h ClockSkewPair.h Configurator.h Computations.h check_computers.h ComputerInfo.h ComputerInfoIcmp.h PacketTimeInfo.h Point.h Observer.h Observable.h TimeSegment.h AnalysisInfo.h gnuplot_graph.h TimeSegmentList.h Tools.h
 OPT = -pthread -lpcap -lm `xml2-config --cflags --libs`
 CC = g++
@@ -31,7 +31,7 @@ LD = g++
 
 .PHONY: debug profiling uninstall clean donotreduce
 
-all: $(program)
+all: $(program) log_reader
 
 debug:
 	make clean
@@ -40,6 +40,9 @@ debug:
 profiling:
 	make clean
 	make CXXFLAGS="-pg -Wall -std=c++0x $(DEFINE)" LDFLAGS="-pg"
+
+donotreduce:
+	make DEFINE="-DDONOTREDUCE"
 
 install: all
 	cp -r pcf config ../bin
@@ -50,7 +53,7 @@ uninstall:
 	rm -f ../bin/pcf
 
 clean:
-	rm -f *.o *~ $(program) log_reader
+	rm -f *.o *~ $(program)
 
 $(program): $(OBJ)
 	$(LD) $(OBJ) $(LDFLAGS) -o $(program) $(OPT)

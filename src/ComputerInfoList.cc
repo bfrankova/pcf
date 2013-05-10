@@ -26,10 +26,10 @@
 #include "Configurator.h"
 #include "ComputerInfoIcmp.h"
 
+ComputerInfoList::~ComputerInfoList() {
+}
 
-ComputerInfoList::~ComputerInfoList() {}
-
-void ComputerInfoList::to_poke_or_not_to_poke(std::string address){
+void ComputerInfoList::to_poke_or_not_to_poke(std::string address) {
   // try to find computer, return if already present and poking
   for (std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it) {
     if ((*it)->get_address() == address)
@@ -37,15 +37,15 @@ void ComputerInfoList::to_poke_or_not_to_poke(std::string address){
   }
   // computer was not found, add new to the list
   ComputerInfoIcmp *new_computer = new ComputerInfoIcmp(this, address.c_str());
-  
+
   // decouple new thread to poke the computer under given address
   new_computer->StartPoking();
   computers.push_back(new_computer);
   save_active(computers, Configurator::instance()->active, *this);
 }
 
-bool ComputerInfoList::new_packet(const char *address, double ttime, uint32_t timestamp)
-{
+bool ComputerInfoList::new_packet(const char *address, double ttime, uint32_t timestamp) {
+
   static unsigned long total = 0;
   std::cout << ++total << ": " << address << " (" << type << ")" << std::endl;
 
@@ -58,38 +58,33 @@ bool ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
 
     // Computer already known
     ComputerInfo &known_computer = **it;
-    if((ttime - known_computer.get_last_packet_time()) < 3)
-      return found;
-    
+
     // first received packet for this IP (ICMP)
-    if(!known_computer.firstPacketReceived){
-        known_computer.insert_first_packet(ttime, timestamp);
-        break;
+    if (!known_computer.firstPacketReceived) {
+      known_computer.insert_first_packet(ttime, timestamp);
+      break;
     }
-        
+
     /// Too much time since last packet so start from the beginning
     if ((ttime - known_computer.get_last_packet_time()) > Configurator::instance()->timeLimit) {
       known_computer.restart(ttime, timestamp);
-#ifdef DEBUG
-      fprintf(stderr, "%s timeout: starting a new tracking\n", known_computer.get_address().c_str());
-#endif
+      if (Configurator::instance()->debug)
+        fprintf(stderr, "%s timeout: starting a new tracking\n", known_computer.get_address().c_str());
       break;
     }
 
     // Check if packet has the same or lower timestamp
     if (timestamp <= known_computer.get_last_packet_timestamp()) {
-#ifdef DEBUG
-      if (timestamp < known_computer.get_last_packet_timestamp())
-        fprintf(stderr, "%s: Lower timestamp %u %u\n", known_computer.get_address().c_str(), timestamp, known_computer.get_last_packet_timestamp());
-#endif
+      if (Configurator::instance()->debug)
+        if (timestamp < known_computer.get_last_packet_timestamp())
+          fprintf(stderr, "%s: Lower timestamp %u %u\n", known_computer.get_address().c_str(), timestamp, known_computer.get_last_packet_timestamp());
       break;
     }
 
     // Stop supporting lists with stupid frequency
     if (std::fabs(known_computer.get_freq()) > 10000) {
-#ifdef DEBUG
-      fprintf(stderr, "%s: too high frequency of %d\n", known_computer.get_address().c_str(), known_computer.get_freq());
-#endif
+      if (Configurator::instance()->debug)
+        fprintf(stderr, "%s: too high frequency of %d\n", known_computer.get_address().c_str(), known_computer.get_freq());
       known_computer.restart(ttime, timestamp);
       break;
     }
@@ -105,7 +100,7 @@ bool ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
 
   if (!found) {
     ComputerInfo *new_computer = new ComputerInfo(this, address);
-    new_computer->firstPacketReceived =  false;
+    new_computer->firstPacketReceived = false;
     new_computer->insert_first_packet(ttime, timestamp);
     computers.push_back(new_computer);
     save_active(computers, Configurator::instance()->active, *this);
@@ -126,25 +121,19 @@ bool ComputerInfoList::new_packet(const char *address, double ttime, uint32_t ti
   return found;
 }
 
-void ComputerInfoList::construct_notify(const std::string &ip, const identity_container &identitites, const TimeSegmentList &s) const
-{
+void ComputerInfoList::construct_notify(const std::string &ip, const identity_container &identitites, const TimeSegmentList &s) const {
   AnalysisInfo cs = {ip, identitites, s};
   Notify(cs);
 }
 
-
-TimeSegmentList * ComputerInfoList::getSkew(std::string ip)
-{
-    for(std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it)
-    {
-        if( (*it)->address == ip )
-        {
-            return &((*it)->timeSegmentList);
-        }
+TimeSegmentList * ComputerInfoList::getSkew(std::string ip) {
+  for (std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it) {
+    if ((*it)->address == ip) {
+      return &((*it)->timeSegmentList);
     }
-    return NULL;
+  }
+  return NULL;
 }
-
 
 void ComputerInfoList::update_skew(const std::string &ip, const TimeSegmentList &s) {
   identity_container old_identities = get_similar_identities(ip);
@@ -152,14 +141,13 @@ void ComputerInfoList::update_skew(const std::string &ip, const TimeSegmentList 
   // Update database, be it a new address or an update
   TimeSegmentList * target_skew = getSkew(ip);
   //
-  if(target_skew == NULL) 
-  {
-      std::cerr << "Pseudo-exception: entry should be present in computer list, but is not. Ip=" << ip << std::endl;
-      exit(1);
+  if (target_skew == NULL) {
+    std::cerr << "Pseudo-exception: entry should be present in computer list, but is not. Ip=" << ip << std::endl;
+    exit(1);
   }
   //
   *(getSkew(ip)) = s;
-  
+
   // Notify observers
   identity_container new_identities = get_similar_identities(ip);
   construct_notify(ip, new_identities, s);
@@ -177,8 +165,7 @@ void ComputerInfoList::update_skew(const std::string &ip, const TimeSegmentList 
   }
 }
 
-const identity_container ComputerInfoList::get_similar_identities(const std::string &ip)
-{
+const identity_container ComputerInfoList::get_similar_identities(const std::string &ip) {
   identity_container identities;
 
   TimeSegmentList * reference_skew = getSkew(ip);
@@ -190,16 +177,14 @@ const identity_container ComputerInfoList::get_similar_identities(const std::str
   if (reference_skew->is_constant()) {
     find_computer_in_saved(reference_skew->get_last_alpha(), identities, Configurator::instance()->threshold, Configurator::instance()->database);
   }
-  
-  for(std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it)
-    {
-        if( (*it)->address == ip )
-        {
-            continue;
-        }
-        
-        if (reference_skew->is_similar_with((*it)->timeSegmentList, Configurator::instance()->threshold)) {
-        identities.insert((*it)->address);
+
+  for (std::list<ComputerInfo *>::iterator it = computers.begin(); it != computers.end(); ++it) {
+    if ((*it)->address == ip) {
+      continue;
+    }
+
+    if (reference_skew->is_similar_with((*it)->timeSegmentList, Configurator::instance()->threshold)) {
+      identities.insert((*it)->address);
     }
   }
 

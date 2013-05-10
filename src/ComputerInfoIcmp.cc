@@ -6,6 +6,7 @@
  */
 
 #include "ComputerInfoIcmp.h"
+#include "Configurator.h"
 
 #include <iostream>
 #include <sys/types.h>
@@ -92,6 +93,8 @@ void * sendIcmpRequests(void * arg){
   icmp->type = ICMP_TSTAMP;
   icmp->code = 0;
   
+  if(Configurator::instance()->debug)
+    std::cout << "ICMP timestamp requests started to IP: " << computer->address << std::endl;
   while (1) {
     icmp->checksum = 0;
     icmp->checksum = in_cksum((unsigned short *) icmp, sizeof (struct icmphdr));
@@ -99,7 +102,7 @@ void * sendIcmpRequests(void * arg){
     if (sendto(s, buffer, dataLength, 0, (struct sockaddr *) &dst, sizeof(struct sockaddr)) < 0)
       perror("sendto failed\n");
     
-    sleep(3);
+    sleep(1);
   }
 }
 
