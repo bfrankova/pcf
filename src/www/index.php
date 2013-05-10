@@ -28,10 +28,8 @@ function debugOutput($message)
 	echo "<div style=\"color: red; background-color: yellow; \">$message</div>";
 }
 
-if (isset($_POST["name"])) {
-	
-	/* save routine START */
-	$database = "data/database.xml";
+function saveComputer($type){
+	$database = getDatabaseName($type);
 	
 	if (!file_exists($database)) {
 		$xmlDoc = new DOMDocument();
@@ -41,19 +39,23 @@ if (isset($_POST["name"])) {
 	}
 	$computers = simplexml_load_file($database);
 	$computer = $computers->addChild("computer");
-	$computer->addAttribute("skew", $_POST["skew_tcp"]);
+	$computer->addAttribute("skew", $_POST["skew_$type"]);
 
 	$computer->addChild("name", $_POST["name"]);
 
-	$computer->addChild("address", $_POST["address_tcp"]);
+	$computer->addChild("address", $_POST["address_$type"]);
 
-	$computer->addChild("frequency", $_POST["frequency_tcp"]);
+	$computer->addChild("frequency", $_POST["frequency_$type"]);
 
-	$computer->addChild("date", $_POST["date_tcp"]);
+	$computer->addChild("date", $_POST["date_$type"]);
 
 	$computers->asXML($database);
-	/* save routine END */
-	
+}
+
+if (isset($_POST["name"])) {
+	saveComputer("tcp");
+	saveComputer("javascript");
+	saveComputer("icmp");
 }
 
 if (file_exists("data/active.xml")) {
@@ -80,34 +82,6 @@ echo printComputers($computersJavascript);
 */
 
 $mergedComputers = array();
-
-class MergedComputerInfo{
-	function __construct($address){
-		$this->address = $address;
-	}
-	public $address;
-	public $name;
-	public $skews = array();
-	public $dates = array();
-	public $packets = array();
-	public $frequencies = array();
-}
-
-function addComputer($computer, $type){
-	global $mergedComputers;
-	
-	$addressString = (string) $computer->address;
-	if(!array_key_exists($addressString, $mergedComputers)){
-		$mergedComputers[$addressString] = new MergedComputerInfo($addressString);
-		$mergedComputers[$addressString]->address = $addressString;
-		$mergedComputers[$addressString]->name = (string)$computer->name;
-	}
-	
-	$mergedComputers[$addressString]->skews[$type] = (string)$computer["skew"];
-	$mergedComputers[$addressString]->dates[$type] = (string)$computer->date;
-	$mergedComputers[$addressString]->packets[$type] = (string)$computer->packets;
-	$mergedComputers[$addressString]->frequencies[$type] = (string)$computer->frequency;
-}
 
 foreach ($computersTcp->computer as $computer){
 	addComputer($computer, "tcp");
@@ -171,26 +145,26 @@ foreach ($mergedComputers as $computer) {
 		echo "<b><font color='#0000b2'><a href=\"javascript:aktual('", $i, "')\">", $computer->address, "</a></font></b><br />";
 		echo "<div id='", $i, "'>";
 		
-		echo "<table border='1'>";
-		if ($computer->name != "") {
-			echo "<tr><td>Diff:</td><td>", $computer->diff, "</td></tr>";
-		}
-		echo "<tr><th>&nbsp;</th><th>TCP</th><th>Javascript</th><th>ICMP</th></tr>";
-		echo "<tr><td width='150px'>Skew:</td><td width='250px'>" . $computer->skews["tcp"] . "</td><td width='250px'>" . $computer->skews["javascript"] . "</td><td width='250px'>" . $computer->skews["icmp"] . "</td></tr>";
-		echo "<tr><td>Packets:</td><td>" . $computer->packets["tcp"] . "</td><td>" . $computer->packets["javascript"] . "</td><td>" . $computer->packets["icmp"] . "</td></tr>";
-		echo "<tr><td>Date:</td><td>" . $computer->dates["tcp"] . "</td><td>" . $computer->dates["javascript"] . "</td><td>" . $computer->dates["icmp"] . "</td></tr>";
-		echo "</table>";
+		printComputer($computer, true);
 		echo "</br>";
 	
 		echo "<form method='post' action='", $_SERVER['PHP_SELF'], "'>";
 		echo "<span style='margin-right: 20px;'>Name:</span><input type='text' name='name' size='45' /><input type='submit' value='Save computer'>";
 	
-		/* triplication START */
 		echo "<input type='hidden' name='skew_tcp' value='", $computer->skews["tcp"], "' />";
 		echo "<input type='hidden' name='address_tcp' value='", $computer->address, "' />";
 		echo "<input type='hidden' name='frequency_tcp' value='", $computer->frequencies["tcp"], "' />";
 		echo "<input type='hidden' name='date_tcp' value='", $computer->dates["tcp"], "' />";
-		/* triplication END */
+		
+		echo "<input type='hidden' name='skew_javascript' value='", $computer->skews["javascript"], "' />";
+		echo "<input type='hidden' name='address_javascript' value='", $computer->address, "' />";
+		echo "<input type='hidden' name='frequency_javascript' value='", $computer->frequencies["javascript"], "' />";
+		echo "<input type='hidden' name='date_javascript' value='", $computer->dates["javascript"], "' />";
+		
+		echo "<input type='hidden' name='skew_icmp' value='", $computer->skews["icmp"], "' />";
+		echo "<input type='hidden' name='address_icmp' value='", $computer->address, "' />";
+		echo "<input type='hidden' name='frequency_icmp' value='", $computer->frequencies["icmp"], "' />";
+		echo "<input type='hidden' name='date_icmp' value='", $computer->dates["icmp"], "' />";
 
 		#echo "<script>aktual('", $i, "')</script>";
 		
