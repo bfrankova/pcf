@@ -22,7 +22,7 @@
 #include <string.h>
 #include "Configurator.h"
 
-#define MAXLEN 254
+#define MAXLEN 4096
 
 
 Configurator * Configurator::innerInstance = NULL;

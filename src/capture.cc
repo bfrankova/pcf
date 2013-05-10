@@ -159,7 +159,6 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
     if (size_tcp == 20) {
       if (Configurator::instance()->debug)
         std::cout << "TCP header without options" << std::endl;
-      return;
     }
     /// TCP options
     u_char *tcp_options = (u_char *) (packet + size_ethernet + size_ip + sizeof (struct tcphdr));
@@ -324,9 +323,6 @@ int StartCapturing() {
 
   // TCP
   filter = "(tcp";
-  // TCP header with options and (very likely) with timestamps
-  filter += " && ((tcp[12] >= 120) || (ip6[52] >= 120)) ";
-
   // Port
   if (Configurator::instance()->port != 0) {
     filter += " && port " + Tools::IntToString(Configurator::instance()->port);
