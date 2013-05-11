@@ -1,4 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<computers><computer skew="-0.000102"><address>192.168.0.39</address><frequency>250</frequency><packets>975</packets><date>Fri May 10 22:09:47 2013
-</date></computer><computer skew="-0.014701"><address>173.194.70.100</address><frequency>1000</frequency><packets>690</packets><date>Fri May 10 22:04:05 2013
-</date></computer></computers>
+<computers/>

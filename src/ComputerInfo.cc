@@ -112,7 +112,8 @@ void ComputerInfo::recompute_block(double packet_delivered)
   }
 
   /// Save Offsets into file
-  save_packets(1);
+  if(!Configurator::instance()->logReader)
+    save_packets(1);
 
   /// Recompute skew for graph
   PacketSegment &last_skew = *packetSegmentList.rbegin();

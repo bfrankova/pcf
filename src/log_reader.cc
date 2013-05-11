@@ -54,7 +54,6 @@ void process_log_file(std::ifstream &ifs)
     ifs >> ttime >> offset;
     //offset = offset / 1000;
     if (ifs.good()) {
-      std::cout << ttime << " " << ttime + offset << std::endl;
       computers->new_packet("log_reader", ttime, ttime + offset);
     }
   }
