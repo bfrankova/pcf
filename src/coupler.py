@@ -2,6 +2,7 @@
 
 import re
 import math
+import sys
 
 # represents single line segment
 class Segment:
@@ -33,9 +34,14 @@ def getSegments(filename):
 			# print("not found")
 			pass
 	return segments
+
+if(len(sys.argv) != 3):
+	print("Not enough inputs.")
+	exit(1)
+
 #
-newSegments1 = getSegments("bulk_output/gp/192.168.0.64-icmp.gp")
-newSegments2 = getSegments("bulk_output/gp/94.245.70.87-icmp.gp")
+newSegments1 = getSegments(sys.argv[1])
+newSegments2 = getSegments(sys.argv[2])
 
 print("Source segments 1:")
 print(newSegments1)
@@ -51,6 +57,10 @@ maxBorder = 0
 for segment in newSegments1 + newSegments2:
 	minBorder = min(minBorder, float(segment.leftBorder))
 	maxBorder = max(maxBorder, float(segment.rightBorder))
+
+if(maxBorder == 0 or minBorder == float("inf")):
+	print("Average skew difference: *")
+	exit(1)
 
 # discretization
 newPoints = []
@@ -96,4 +106,7 @@ for segment in resultSegments:
 	averageSkewDifference += weight * segment.skew
 
 print()
-print("Average skew difference:", averageSkewDifference)
+if(averageSkewDifference == 0.0):
+	print("Average skew difference: *")
+else:
+	print("Average skew difference:", ("%.2f" % averageSkewDifference))
