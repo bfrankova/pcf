@@ -17,6 +17,7 @@
  * along with pcf. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <limits.h>
 #include <cstring>
 #include <iostream>
 #include <fstream>
@@ -47,6 +48,7 @@ void process_log_file(std::ifstream &ifs)
   gnuplot_graph graph_creator("tcp");
   computers->AddObserver(&graph_creator);
   
+  static const int UINT_TUNNELLING_SHIFT = (int) INT_MAX / 2;
   
   double ttime, offset;
 
@@ -54,7 +56,7 @@ void process_log_file(std::ifstream &ifs)
     ifs >> ttime >> offset;
     //offset = offset / 1000;
     if (ifs.good()) {
-      computers->new_packet("log_reader", ttime, ttime + offset);
+      computers->new_packet("log_reader", ttime, ttime + offset + UINT_TUNNELLING_SHIFT);
     }
   }
 }

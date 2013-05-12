@@ -2,3 +2,18 @@
 *.pyc
 src/pcf
 /src/nbproject/private/
+/src/log/17 hops/graph/.svn/
+/src/log/17 hops/log/.svn/
+/src/log/17 hops/www/.svn/
+/src/log/17 hops/www/data/.svn/
+/src/log/17 hops/www/graph/.svn/
+/src/log/18 hops (UK)/graph/.svn/
+/src/log/18 hops (UK)/log/.svn/
+/src/log/18 hops (UK)/www/.svn/
+/src/log/18 hops (UK)/www/data/.svn/
+/src/log/18 hops (UK)/www/graph/.svn/
+/src/log/21 hops/graph/.svn/
+/src/log/21 hops/log/.svn/
+/src/log/21 hops/www/.svn/
+/src/log/21 hops/www/data/.svn/
+/src/log/21 hops/www/graph/.svn/
