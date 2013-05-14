@@ -1,6 +1,7 @@
 /**
  * Copyright (C) 2012 Jakub Jirasek <xjiras02@stud.fit.vutbr.cz>
  *                    Libor Polčák <ipolcak@fit.vutbr.cz>
+ *                    Barbora Frankova <xfrank08@stud.fit.vutbr.cz>
  * 
  * This file is part of pcf - PC fingerprinter.
  *

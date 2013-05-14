@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2012 Jakub Jirasek <xjiras02@stud.fit.vutbr.cz>
+ *                    Barbora Frankova <xfrank08@stud.fit.vutbr.cz>
  * 
  * This file is part of pcf - PC fingerprinter.
  *
@@ -46,6 +47,8 @@ void print_help() {
           "  -n\t\tNumber of packets to capture (0 for infinity)\n"
           "  -t\t\tTime for capturing (in seconds, 0 for infinity)\n"
           "  -p\t\tPort number (1-65535)\n\n"
+          "  -i\t\tDisable ICMP\n\n"
+          "  -d\t\tDebug mode\n\n"
           "Examples:\n"
           "  pcf\n"
           "  pcf -n 100 -t 600 -p 80 wlan0\n\n");
