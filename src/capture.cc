@@ -112,6 +112,11 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
     std::cerr<< "Unknown physical layer protocol." << std::endl;
     return;
   }
+  // VLAN
+   if(type_link_proto == 0x8100){
+    type_link_proto = ntohs(*((uint16_t *)(packet + size_link_proto) + 1));
+    size_link_proto += 4;
+  }
 
   /// IPv4
   if (type_link_proto == 0x0800) {
@@ -149,7 +154,7 @@ void GotPacket(u_char *args, const struct pcap_pkthdr *header, const u_char *pac
       fprintf(stderr, "Cannot get IP address\n");
       return;
     }
-  } else {
+  } else  {
     fprintf(stderr, "Unknown Ethernet type\n");
     return;
   }
@@ -401,7 +406,7 @@ int StartCapturing() {
     filter += ")";
   }
 
-  filter += ") || (icmp && icmp[icmptype] == icmp-tstampreply)";
+  filter += ") || (icmp && icmp[icmptype] == icmp-tstampreply) || (vlan)";
 
 #ifdef DEBUG
   std::cout << "Filter: " << filter << std::endl;
@@ -470,7 +475,7 @@ int StartCapturing() {
   }
   
   Configurator::instance()->datalink = pcap_datalink_val_to_name(pcap_datalink(handle));
-
+  
   /// Start capturing TODO
   if (pcap_loop(handle, Configurator::instance()->number, GotPacket, NULL) == -1) {
     std::cerr << "An error occured during capturing: " << pcap_geterr(handle) << std::endl;
